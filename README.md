@@ -34,10 +34,9 @@ flowchart TB
 3. USB-C battery pack
 4. Phone stand
 
-Buy links:
+Module link:
 
 - Seeed Studio search for the module pack: https://www.seeedstudio.com/catalogsearch/result/?q=MR60BHA2
-- Seeed Studio search for the XIAO ESP32C6 board: https://www.seeedstudio.com/catalogsearch/result/?q=XIAO%20ESP32C6
 
 ![Hardware overview](docs/images/hardware-overview.jpg)
 
