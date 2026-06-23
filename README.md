@@ -14,9 +14,9 @@ The project is aimed at two short-range sensing use cases:
 3. USB-C battery pack
 4. Phone stand
 
-![Hardware overview](docs/images/08-hardware-overview.jpg)
+![Hardware overview](docs/images/hardware-overview.jpg)
 
-![Mounted side view](docs/images/09-mounted-side-view.png)
+![Mounted side view](docs/images/mounted-side-view.png)
 
 ## Install First
 
@@ -25,13 +25,13 @@ The project is aimed at two short-range sensing use cases:
 1. Select `XIAO ESP32C6` and the correct port.
 2. Use the board settings shown below if Arduino picks the wrong profile.
 3. Upload the sketch with the board connected.
-4. Use the open-enclosure programming setup as the physical wiring reference.
+4. Use the Arduino programming setup as the physical wiring reference.
 
-![Arduino IDE board settings](docs/images/07-arduino-board-settings.png)
+![Arduino IDE board settings](docs/images/arduino-board-settings.png)
 
-![Arduino IDE upload](docs/images/06-arduino-ide-upload.png)
+![Arduino IDE upload](docs/images/arduino-ide-upload.png)
 
-![Arduino programming setup](docs/images/10-open-enclosure.png)
+![Arduino programming setup](docs/images/arduino-programming-setup.png)
 
 ### Firmware Values
 
@@ -65,19 +65,19 @@ The images in `docs/images/` were re-saved without embedded EXIF or location met
 
 ### Radar target tracking
 
-![Radar target tracking](docs/images/01-radar-target-tracking-single.png)
+![Radar target tracking](docs/images/radar-target-tracking-single.png)
 
 Use this as the main live view for a single subject. It shows presence, range, angle, speed, and the breathing and heart traces.
 
 ### Multi-target tracking
 
-![Multi-target tracking](docs/images/02-radar-target-tracking-multi.png)
+![Multi-target tracking](docs/images/radar-target-tracking-multi.png)
 
 Use this view when more than one person is in range. It is the best reference for rear-seat occupancy or room monitoring.
 
 ### Range, angle, and speed history
 
-![Range, angle, and speed history](docs/images/05-range-angle-speed-traces.png)
+![Range, angle, and speed history](docs/images/range-angle-speed-traces.png)
 
 Use this section to watch whether a target is stable, moving closer, or moving farther away.
 
@@ -85,13 +85,13 @@ Use this section to watch whether a target is stable, moving closer, or moving f
 
 ### LED control and threshold rules
 
-![LED control and rule mode](docs/images/03-led-control-and-rule.png)
+![LED control and rule mode](docs/images/led-control-and-rule.png)
 
 This is the local status LED control surface. It can run manually or follow a sensor threshold rule.
 
 ### Session logger
 
-![Session logger](docs/images/04-session-logger.png)
+![Session logger](docs/images/session-logger.png)
 
 This records named sessions and exports JSON for later review.
 
