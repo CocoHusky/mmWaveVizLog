@@ -1,4 +1,4 @@
-# MR60BHA2 Sensor Workbench
+# MR60BHA2 Sensor quick setup
 
 A self-contained Arduino sketch for the Seeed Studio MR60BHA2 mmWave radar module running on a XIAO ESP32-C6. The device creates its own Wi-Fi access point and serves a local web dashboard for live radar, bio-signal, target tracking, ambient light, status LED rules, and session logging.
 
