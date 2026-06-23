@@ -2,7 +2,7 @@
 
 ## Summary
 
-MR60BHA2 Sensor VisLog is a quick-setup radar console for the Seeed MR60BHA2 on a XIAO ESP32-C6. It is meant for initial testing, live sensing, and data logging without needing a full custom app first.
+MR60BHA2 Sensor VisLog is a quick-setup radar console for the Seeed MR60BHA2 on a XIAO ESP32-C6. It is meant for initial testing, live sensing, and data logging before you build a larger app around the hardware.
 
 It can collect:
 
@@ -16,31 +16,17 @@ It can collect:
 
 ```mermaid
 flowchart TB
-  A[MR60BHA2 Sensor VisLog]
-  A --> B[Presence]
-  A --> C[Target Tracking]
-  A --> D[Physiology]
-  A --> E[Environment]
-  A --> F[Logging and LEDs]
-
-  B --> B1[Presence]
-  B --> B2[Target count]
-
-  C --> C1[Range]
-  C --> C2[Angle]
-  C --> C3[Speed]
-
-  D --> D1[Heart rate]
-  D --> D2[Breathing rate]
-  D --> D3[Heart phase]
-  D --> D4[Breathing phase]
-  D --> D5[Total phase]
-
-  E --> E1[Ambient light]
-
-  F --> F1[Session logging]
-  F --> F2[LED control]
+  A(["MR60BHA2 Sensor VisLog"])
+  A --> P["Presence\nTarget count"]
+  A --> T["Target tracking\nRange\nAngle\nSpeed"]
+  A --> H["Physiology\nHeart rate\nBreathing rate\nMotion phases"]
+  A --> E["Environment\nAmbient light"]
+  A --> L["Logging and LEDs\nSession logger\nThreshold rules"]
 ```
+
+![Radar target tracking preview](docs/images/radar-target-tracking-single.png)
+
+This is the main live view you should expect when the system is running.
 
 ## Hardware
 
@@ -49,16 +35,22 @@ flowchart TB
 3. USB-C battery pack
 4. Phone stand
 
+Buy links:
+
+- Seeed Studio search for the module pack: https://www.seeedstudio.com/catalogsearch/result/?q=MR60BHA2
+- Seeed Studio search for the XIAO ESP32C6 board: https://www.seeedstudio.com/catalogsearch/result/?q=XIAO%20ESP32C6
+
 ![Hardware overview](docs/images/hardware-overview.jpg)
 
 ![Mounted side view](docs/images/mounted-side-view.png)
 
-## Reference Docs
+## Reference Links
 
-- Seeed datasheet PDF: https://files.seeedstudio.com/wiki/mmwave-for-xiao/mr60/datasheet/MR60BHA2_Breathing_and_Heartbeat_Module.pdf
-- Seeed wiki: https://wiki.seeedstudio.com/ , then search for MR60BHA2
-
-The main firmware comments and frame notes also reflect the installed Seeed Arduino mmWave library used by this repo.
+- Seeed MR60BHA2 datasheet PDF: https://files.seeedstudio.com/wiki/mmwave-for-xiao/mr60/datasheet/MR60BHA2_Breathing_and_Heartbeat_Module.pdf
+- Seeed wiki home: https://wiki.seeedstudio.com/ and search for `MR60BHA2`
+- Arduino IDE download: https://www.arduino.cc/en/software
+- Arduino Boards Manager guide: https://docs.arduino.cc/software/ide-v2/tutorials/ide-v2-board-manager
+- Arduino Library Manager guide: https://docs.arduino.cc/software/ide-v2/tutorials/ide-v2-library-manager
 
 ## Repo Layout
 
@@ -80,19 +72,24 @@ LICENSE
 
 This is the fastest path for first bring-up and hardware testing.
 
-#### 1. First flash over USB
+#### 1. Install the tools
+
+Install these first:
 
 1. Arduino IDE 2.x
-2. ESP32 board support package from Espressif
-3. `Seeed_Arduino_mmWave` from Library Manager
+2. ESP32 board support package from Espressif through Boards Manager
+3. `Seeed_Arduino_mmWave` through Library Manager
+
+#### 2. First flash over USB
 
 Open the legacy sketch and flash it with USB connected:
 
 1. `quicksetup/MR60BHA2_Sensor_VisLog/MR60BHA2_Sensor_VisLog.ino`
-2. Select board `XIAO ESP32C6`
-3. Select the correct USB serial port
-4. Match the board settings shown in the screenshot below
-5. Upload the sketch over the wired USB connection
+2. In Tools > Board, choose `XIAO ESP32C6` from the ESP32 board list
+3. If `XIAO ESP32C6` is missing, open Boards Manager and install or update the Espressif ESP32 package, then reload the board list
+4. Select the correct USB serial port in Tools > Port
+5. Match the board settings shown in the screenshot below
+6. Upload the sketch over the wired USB connection
 
 ![Arduino IDE board settings](docs/images/arduino-board-settings.png)
 
@@ -110,9 +107,11 @@ static const char *OTA_PASSWORD = "wp-ota";
 static const char *VisLog_FW_VERSION = "2.1.4";
 ```
 
-#### 2. Update over Wi-Fi with OTA
+#### 3. Update over Wi-Fi with OTA
 
-After the wired flash succeeds, switch the board to the OTA Wi-Fi:
+OTA is optional. Use it for small tweaks when you do not want to reconnect USB-C every time.
+
+After the wired flash succeeds:
 
 1. Connect to `mmWaveVisLog-MR60BHA2`
 2. Use password `wirelessphysiology`
@@ -122,8 +121,8 @@ After the wired flash succeeds, switch the board to the OTA Wi-Fi:
 
 Important:
 
-- the OTA hostname is `mmWaveVisLog-MR60BHA2-OTA`
-- if the OTA port is not visible immediately, keep waiting for the full 2 minutes before retrying
+- OTA hostname: `mmWaveVisLog-MR60BHA2-OTA`
+- If the OTA port is not visible immediately, keep waiting for the full 2 minutes before retrying
 
 ### PlatformIO
 
@@ -136,8 +135,6 @@ pio run --target upload
 pio run --target uploadfs
 pio device monitor
 ```
-
-The images in `docs/images/` were re-saved without embedded EXIF or location metadata.
 
 ## Open The UI
 
