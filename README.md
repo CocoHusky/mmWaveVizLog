@@ -19,7 +19,7 @@ point, and serves the browser UI from LittleFS.
 From the PlatformIO project folder:
 
 ```sh
-cd /Users/alexburton/Documents/mmWave/firmware/mr60bha2_console
+cd /Users/username/Documents/mmWave/firmware/mr60bha2_console
 pio run
 pio run --target upload
 pio run --target uploadfs
@@ -56,7 +56,7 @@ frame layout below is therefore taken from the installed `Seeed_Arduino_mmWave`
 library parser in:
 
 ```text
-/Users/alexburton/Documents/Arduino/libraries/Seeed_Arduino_mmWave/src
+/Users/username/Documents/Arduino/libraries/Seeed_Arduino_mmWave/src
 ```
 
 ### Module And Board Hardware
