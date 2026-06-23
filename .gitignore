@@ -1,0 +1,17 @@
+# macOS metadata
+.DS_Store
+**/.DS_Store
+
+# PlatformIO build artifacts
+.pio/
+.vscode/
+.cache/
+.mypy_cache/
+.pytest_cache/
+*.pioenvs
+*.pio/build
+
+# Temporary editor files
+*~
+*.swp
+*.swo
