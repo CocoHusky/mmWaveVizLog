@@ -40,6 +40,31 @@ Module link:
 
 ![Hardware overview](images/hardware-overview.jpg)
 
+## Safety and Exposure
+
+This project uses the Seeed MR60BHA2, a low-power 60 GHz radar module. The module datasheet lists 3.3 V operation, about 600 mA typical current, and 12 dBm transmit power, so the RF source is designed for sensing rather than high-power transmission.
+
+What the current literature and exposure guidance support:
+
+- 60 GHz RF is non-ionizing.
+- Interaction with the body is shallow and concentrated near the skin surface, not deep tissue.
+- Above-6 GHz exposure limits are set to prevent excessive tissue heating.
+- For compliant low-power use, the main known risk is local heating if the device is misused or driven beyond spec.
+
+What this means for this repo:
+
+- The sensor is appropriate for monitoring and research-style prototyping, including presence, breathing, and heartbeat estimation.
+- It should not be described as a medical treatment device.
+- For long-term bedside or in-vehicle use, follow the module datasheet, keep the hardware powered within spec, and avoid claiming zero risk.
+
+Selected reading and public links:
+
+- Seeed MR60BHA2 technical specification: [PDF](https://files.seeedstudio.com/wiki/mmwave-for-xiao/mr60/datasheet/MR60BHA2_Breathing_and_Heartbeat_Module.pdf)
+- Wu, Rappaport, and Collins, *The Human Body and Millimeter-Wave Wireless Communication Systems: Interactions and Implications*: [arXiv](https://arxiv.org/abs/1503.05944)
+- Hirata et al., *Human Exposure to Radiofrequency Energy above 6 GHz: Review of Computational Dosimetry Studies*: [arXiv](https://arxiv.org/abs/2011.10699)
+- Nasim, Kim, and Sharif, *Human Electromagnetic Field Exposure in Wearable Communications: A Review*: [arXiv](https://arxiv.org/abs/1912.05282)
+- FCC radio frequency safety guidance: [fcc.gov/general/radio-frequency-safety-0](https://www.fcc.gov/general/radio-frequency-safety-0)
+
 ## Reference Links
 
 - Seeed MR60BHA2 datasheet PDF: https://files.seeedstudio.com/wiki/mmwave-for-xiao/mr60/datasheet/MR60BHA2_Breathing_and_Heartbeat_Module.pdf
