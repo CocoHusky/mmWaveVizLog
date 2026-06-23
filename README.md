@@ -48,6 +48,7 @@ Buy links:
 
 - Seeed MR60BHA2 datasheet PDF: https://files.seeedstudio.com/wiki/mmwave-for-xiao/mr60/datasheet/MR60BHA2_Breathing_and_Heartbeat_Module.pdf
 - Seeed wiki home: https://wiki.seeedstudio.com/ and search for `MR60BHA2`
+- Seeed mmWave Arduino library: https://github.com/Seeed-Studio/Seeed_Arduino_mmWave
 - Arduino IDE download: https://www.arduino.cc/en/software
 - Arduino Boards Manager guide: https://docs.arduino.cc/software/ide-v2/tutorials/ide-v2-board-manager
 - Arduino Library Manager guide: https://docs.arduino.cc/software/ide-v2/tutorials/ide-v2-library-manager
@@ -154,6 +155,16 @@ What you should expect in the UI:
 - `LED control and threshold rules` lets the local LED follow a sensor condition.
 - `Session logger` records named captures and exports JSON.
 
+### Plot Controls
+
+![Plot controls](docs/images/plot-controls-window.png)
+
+Use the plot window selector to switch between 18, 36, and 72 seconds of history.
+
+Use the noise/stability band selector to show the rolling 12-point band at `off`, `+/- 1 sigma`, `+/- 2 sigma`, or `+/- 3 sigma`.
+
+Use `Reset plots` to clear the graph history and start a fresh capture.
+
 ### Radar Target Tracking
 
 ![Radar target tracking](docs/images/radar-target-tracking-single.png)
@@ -165,6 +176,16 @@ Use this view for a single subject. It shows presence, target count, range, angl
 ![Multi-target tracking](docs/images/radar-target-tracking-multi.png)
 
 Use this view when more than one person is in range. It is useful for rear-seat monitoring or room occupancy checks.
+
+### Multi-Target Plot Colors
+
+![Multi-target plot colors](docs/images/multi-target-plot-colors.png)
+
+The target colors are consistent across the charts:
+
+- Target 1: red
+- Target 2: orange
+- Target 3: green
 
 ### Range, Angle, and Speed History
 
