@@ -1,0 +1,14 @@
+/*
+ * SPDX-License-Identifier: MIT
+ *
+ * Wiring contract preserved from the Arduino quicksetup:
+ * - MR60BHA2 UART RX: GPIO17
+ * - MR60BHA2 UART TX: GPIO16
+ * - WS2812 RGB LED: GPIO1
+ * - BH1750 I2C SDA: GPIO22
+ * - BH1750 I2C SCL: GPIO23
+ *
+ * The first Zephyr milestone uses USB serial JSON output only. Pin mux and
+ * peripheral aliases should be enabled here during the hardware bring-up pass
+ * after the board target is confirmed in the local Zephyr checkout.
+ */
