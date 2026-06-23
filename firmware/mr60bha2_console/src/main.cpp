@@ -7,7 +7,7 @@
  *   - WS2812 RGB control and sensor threshold rules
  *   - A compact dashboard served directly by the XIAO ESP32-C6
  *
- * Upload firmware and filesystem, connect to WiFi "MR60BHA2-Bench" (password "mr60bench"), and open:
+ * Upload firmware and filesystem, connect to WiFi "mmWaveVisLog-MR60BHA2" (password "wirelessphysiology"), and open:
  *   http://192.168.4.1/
  */
 
@@ -31,11 +31,11 @@ static constexpr float MAX_VALID_DISTANCE_M = 6.0f;
 static constexpr uint8_t MAX_UI_TARGETS = MAX_TARGET_NUM;
 static const char *UI_INDEX_PATH = "/index.html";
 
-static const char *AP_SSID = "MR60BHA2-Bench";
-static const char *AP_PASSWORD = "mr60bench";
-static const char *OTA_HOSTNAME = "mr60bha2";
-static const char *OTA_PASSWORD = "mr60ota";
-static const char *CONSOLE_FW_VERSION = "2.1.2";
+static const char *WIFI_AP_SSID = "mmWaveVisLog-MR60BHA2";
+static const char *WIFI_AP_PASSWORD = "wirelessphysiology";
+static const char *OTA_HOSTNAME = "mmWaveVisLog-MR60BHA2-OTA";
+static const char *OTA_PASSWORD = "wp-ota";
+static const char *VisLog_FW_VERSION = "2.1.4";
 
 HardwareSerial mmWaveSerial(1);
 SEEED_MR60BHA2 mmWave;
@@ -400,7 +400,7 @@ String sampleJson() {
   json += "],";
   json += "\"light\":" + jsonNumber(sample.light, 1) + ",";
   json += "\"light_ready\":" + String(lightSensorReady ? "true" : "false") + ",";
-  json += "\"console_fw\":\"" + String(CONSOLE_FW_VERSION) + "\",";
+  json += "\"console_fw\":\"" + String(VisLog_FW_VERSION) + "\",";
   json += "\"firmware_valid\":" + String(sample.firmwareValid ? "true" : "false") + ",";
   json += "\"firmware_raw\":" + String(sample.firmwareRaw) + ",";
   json += "\"firmware_project\":" + String(sample.firmwareProject) + ",";
@@ -525,14 +525,14 @@ void setup() {
   }
 
   WiFi.mode(WIFI_AP);
-  WiFi.softAP(AP_SSID, AP_PASSWORD);
+  WiFi.softAP(WIFI_AP_SSID, WIFI_AP_PASSWORD);
   setupServer();
   setupOta();
 
   Serial.println();
   Serial.println("MR60BHA2 console ready");
   Serial.print("WiFi: ");
-  Serial.println(AP_SSID);
+  Serial.println(WIFI_AP_SSID);
   Serial.print("Open: http://");
   Serial.println(WiFi.softAPIP());
   Serial.print("OTA hostname: ");
