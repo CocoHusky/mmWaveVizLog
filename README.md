@@ -1,11 +1,46 @@
 # MR60BHA2 Sensor VisLog
 
-PlatformIO firmware and a browser dashboard for the Seeed MR60BHA2 radar on a XIAO ESP32-C6.
+## Summary
 
-The project is aimed at two short-range sensing use cases:
+MR60BHA2 Sensor VisLog is a quick-setup radar console for the Seeed MR60BHA2 on a XIAO ESP32-C6. It is meant for initial testing, live sensing, and data logging without needing a full custom app first.
 
-- rear-seat or baby monitoring: presence, target count, movement toward or away, and speed
-- bedside physiology monitoring: breathing rate, heart rate, and motion phase
+It can collect:
+
+- presence and target count
+- range, angle, and speed for tracked targets
+- heart rate and breathing rate
+- total, breathing, and heart motion phase
+- ambient light
+- firmware and device status
+- local RGB LED state and threshold-rule output
+
+```mermaid
+flowchart TB
+  A[MR60BHA2 Sensor VisLog]
+  A --> B[Presence]
+  A --> C[Target Tracking]
+  A --> D[Physiology]
+  A --> E[Environment]
+  A --> F[Logging and LEDs]
+
+  B --> B1[Presence]
+  B --> B2[Target count]
+
+  C --> C1[Range]
+  C --> C2[Angle]
+  C --> C3[Speed]
+
+  D --> D1[Heart rate]
+  D --> D2[Breathing rate]
+  D --> D3[Heart phase]
+  D --> D4[Breathing phase]
+  D --> D5[Total phase]
+
+  E --> E1[Ambient light]
+
+  F --> F1[Session logging]
+  F --> F2[LED control]
+```
 
 ## Hardware
 
@@ -18,14 +53,46 @@ The project is aimed at two short-range sensing use cases:
 
 ![Mounted side view](docs/images/mounted-side-view.png)
 
-## Install First
+## Reference Docs
+
+- Seeed datasheet PDF: https://files.seeedstudio.com/wiki/mmwave-for-xiao/mr60/datasheet/MR60BHA2_Breathing_and_Heartbeat_Module.pdf
+- Seeed wiki: https://wiki.seeedstudio.com/ , then search for MR60BHA2
+
+The main firmware comments and frame notes also reflect the installed Seeed Arduino mmWave library used by this repo.
+
+## Repo Layout
+
+```text
+firmware/mr60bha2_console/
+  platformio.ini
+  src/main.cpp
+  data/index.html
+quicksetup/
+  legacy Arduino sketch and notes
+docs/images/
+  screenshots and setup photos used below
+LICENSE
+```
+
+## Quick Setup
 
 ### Arduino IDE
 
-1. Select `XIAO ESP32C6` and the correct port.
-2. Use the board settings shown below if Arduino picks the wrong profile.
-3. Upload the sketch with the board connected.
-4. Use the Arduino programming setup as the physical wiring reference.
+This is the fastest path for first bring-up and hardware testing.
+
+Install:
+
+1. Arduino IDE 2.x
+2. ESP32 board support package from Espressif
+3. `Seeed_Arduino_mmWave` from Library Manager
+
+Open:
+
+1. `quicksetup/MR60BHA2_Sensor_VisLog/MR60BHA2_Sensor_VisLog.ino`
+2. Select board `XIAO ESP32C6`
+3. Select the correct USB serial port
+4. Match the board settings shown in the screenshot below
+5. Upload the sketch
 
 ![Arduino IDE board settings](docs/images/arduino-board-settings.png)
 
@@ -33,9 +100,7 @@ The project is aimed at two short-range sensing use cases:
 
 ![Arduino programming setup](docs/images/arduino-programming-setup.png)
 
-### Firmware Values
-
-Use these exact values in the firmware and the setup notes:
+Use these exact firmware values in your setup notes:
 
 ```cpp
 static const char *WIFI_AP_SSID = "mmWaveVisLog-MR60BHA2";
@@ -45,11 +110,9 @@ static const char *OTA_PASSWORD = "wp-ota";
 static const char *VisLog_FW_VERSION = "2.1.4";
 ```
 
-Open the UI at `http://192.168.4.1/`.
-
 ### PlatformIO
 
-If you are using PlatformIO instead of Arduino IDE:
+This repo’s main firmware lives in PlatformIO format.
 
 ```sh
 cd firmware/mr60bha2_console
@@ -61,49 +124,54 @@ pio device monitor
 
 The images in `docs/images/` were re-saved without embedded EXIF or location metadata.
 
-## Live Views
+## Open The UI
 
-### Radar target tracking
+Connect to the device Wi-Fi:
+
+- SSID: `mmWaveVisLog-MR60BHA2`
+- Password: `wirelessphysiology`
+- UI: `http://192.168.4.1/`
+- OTA hostname: `mmWaveVisLog-MR60BHA2-OTA`
+- OTA password: `wp-ota`
+
+What you should expect in the UI:
+
+- `Radar target tracking` is the main live view for one subject.
+- `Multi-target tracking` shows multiple people or objects in range.
+- `Range, angle, and speed history` is the quickest way to see motion toward or away from the sensor.
+- `LED control and threshold rules` lets the local LED follow a sensor condition.
+- `Session logger` records named captures and exports JSON.
+
+### Radar Target Tracking
 
 ![Radar target tracking](docs/images/radar-target-tracking-single.png)
 
-Use this as the main live view for a single subject. It shows presence, range, angle, speed, and the breathing and heart traces.
+Use this view for a single subject. It shows presence, target count, range, angle, speed, and the heart and breathing plots.
 
-### Multi-target tracking
+### Multi-Target Tracking
 
 ![Multi-target tracking](docs/images/radar-target-tracking-multi.png)
 
-Use this view when more than one person is in range. It is the best reference for rear-seat occupancy or room monitoring.
+Use this view when more than one person is in range. It is useful for rear-seat monitoring or room occupancy checks.
 
-### Range, angle, and speed history
+### Range, Angle, and Speed History
 
 ![Range, angle, and speed history](docs/images/range-angle-speed-traces.png)
 
 Use this section to watch whether a target is stable, moving closer, or moving farther away.
 
-## Control and Logging
-
-### LED control and threshold rules
+### LED Control and Threshold Rules
 
 ![LED control and rule mode](docs/images/led-control-and-rule.png)
 
-This is the local status LED control surface. It can run manually or follow a sensor threshold rule.
+Use this section to drive the status LED manually or tie it to a measurement threshold.
 
-### Session logger
+### Session Logger
 
 ![Session logger](docs/images/session-logger.png)
 
-This records named sessions and exports JSON for later review.
+Use this section to name a run, record it, and export JSON for later review.
 
-## Repository Layout
+## License
 
-```text
-firmware/mr60bha2_console/
-  platformio.ini
-  src/main.cpp
-  data/index.html
-quicksetup/
-  legacy Arduino sketch and notes
-docs/images/
-  screenshots and setup photos used above
-```
+This repository is licensed under the MIT License. See [LICENSE](LICENSE).
