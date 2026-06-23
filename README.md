@@ -24,7 +24,7 @@ flowchart TB
   A --> L["Logging and LEDs\nSession logger\nThreshold rules"]
 ```
 
-![Radar target tracking preview](docs/images/radar-target-tracking-single.png)
+![Radar target tracking preview](images/radar-target-tracking-single.png)
 
 
 ## Hardware
@@ -38,9 +38,7 @@ Module link:
 
 - Seeed Studio search for the module pack: https://www.seeedstudio.com/catalogsearch/result/?q=MR60BHA2
 
-![Hardware overview](docs/images/hardware-overview.jpg)
-
-![Mounted side view](docs/images/mounted-side-view.png)
+![Hardware overview](images/hardware-overview.jpg)
 
 ## Reference Links
 
@@ -60,7 +58,7 @@ firmware/mr60bha2_console/
   data/index.html
 quicksetup/
   legacy Arduino sketch and notes
-docs/images/
+images/
   screenshots and setup photos used below
 LICENSE
 ```
@@ -90,11 +88,11 @@ Open the legacy sketch and flash it with USB connected:
 5. Match the board settings shown in the screenshot below
 6. Upload the sketch over the wired USB connection
 
-![Arduino IDE board settings](docs/images/arduino-board-settings.png)
+![Arduino IDE board settings](images/arduino-board-settings.png)
 
-![Arduino IDE upload](docs/images/arduino-ide-upload.png)
+![Arduino IDE upload](images/arduino-ide-upload.png)
 
-![Arduino programming setup](docs/images/arduino-programming-setup.png)
+![Arduino programming setup](images/arduino-programming-setup.png)
 
 Use these exact firmware values in your setup notes:
 
@@ -155,7 +153,7 @@ What you should expect in the UI:
 
 ### Plot Controls
 
-![Plot controls](docs/images/plot-controls-window.png)
+![Plot controls](images/plot-controls-window.png)
 
 Use the plot window selector to switch between 18, 36, and 72 seconds of history.
 
@@ -165,19 +163,19 @@ Use `Reset plots` to clear the graph history and start a fresh capture.
 
 ### Radar Target Tracking
 
-![Radar target tracking](docs/images/radar-target-tracking-single.png)
+![Radar target tracking](images/radar-target-tracking-single.png)
 
 Use this view for a single subject. It shows presence, target count, range, angle, speed, and the heart and breathing plots.
 
 ### Multi-Target Tracking
 
-![Multi-target tracking](docs/images/radar-target-tracking-multi.png)
+![Multi-target tracking](images/radar-target-tracking-multi.png)
 
 Use this view when more than one person is in range. It is useful for rear-seat monitoring or room occupancy checks.
 
 ### Multi-Target Plot Colors
 
-![Multi-target plot colors](docs/images/multi-target-plot-colors.png)
+![Multi-target plot colors](images/multi-target-plot-colors.png)
 
 The target colors are consistent across the charts:
 
@@ -187,19 +185,19 @@ The target colors are consistent across the charts:
 
 ### Range, Angle, and Speed History
 
-![Range, angle, and speed history](docs/images/range-angle-speed-traces.png)
+![Range, angle, and speed history](images/range-angle-speed-traces.png)
 
 Use this section to watch whether a target is stable, moving closer, or moving farther away.
 
 ### LED Control and Threshold Rules
 
-![LED control and rule mode](docs/images/led-control-and-rule.png)
+![LED control and rule mode](images/led-control-and-rule.png)
 
 Use this section to drive the status LED manually or tie it to a measurement threshold.
 
 ### Session Logger
 
-![Session logger](docs/images/session-logger.png)
+![Session logger](images/session-logger.png)
 
 Use this section to name a run, record it, and export JSON for later review.
 
