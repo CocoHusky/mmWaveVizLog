@@ -14,6 +14,8 @@ It can collect:
 - firmware and device status
 - local RGB LED state and threshold-rule output
 
+The live JSON sample endpoint is `GET /api/sample`.
+
 ```mermaid
 flowchart TB
   A(["MR60BHA2 Sensor VisLog"])
@@ -26,6 +28,48 @@ flowchart TB
 
 ![Radar target tracking preview](images/radar-target-tracking-single.png)
 
+## Current JSON Output
+
+Fields returned by `sampleJson()`:
+
+| JSON field | Meaning |
+| --- | --- |
+| `heart_rate` | Heart rate in bpm, or `null`. |
+| `breath_rate` | Breathing rate in rpm, or `null`. |
+| `distance` | Normalized metres, or `null`. |
+| `raw_distance` | Raw radar distance reading, or `null`. |
+| `total_phase` | Total motion phase, or `null`. |
+| `breath_phase` | Breathing-filtered motion phase, or `null`. |
+| `heart_phase` | Heartbeat-filtered motion phase, or `null`. |
+| `presence` | Presence flag. |
+| `presence_valid` | Whether the presence value is valid. |
+| `presence_source` | Presence source label such as `sensor`, `waiting`, or `stale`. |
+| `target_valid` | Whether target tracking data is valid. |
+| `target_source` | Target source label such as `sensor`, `waiting`, or `stale`. |
+| `people_count` | Target count, mirrored for compatibility. |
+| `target_count` | Target count. |
+| `target_x` | Primary target X position in metres, or `null`. |
+| `target_y` | Primary target Y position in metres, or `null`. |
+| `target_distance` | Primary target distance in metres, or `null`. |
+| `target_angle` | Primary target angle in degrees, or `null`. |
+| `target_speed` | Primary target speed in m/s, or `null`. |
+| `targets` | Array of tracked targets with `x`, `y`, `distance`, `angle`, `speed`, `dop_index`, and `cluster_index`. |
+| `light` | Ambient light in lux, or `null`. |
+| `light_ready` | Whether the BH1750 light sensor is ready. |
+| `console_fw` | Console firmware version string. |
+| `firmware_valid` | Whether the radar firmware value parsed correctly. |
+| `firmware_raw` | Raw radar firmware value. |
+| `firmware_project` | Parsed radar firmware project field. |
+| `firmware_major` | Parsed radar firmware major version. |
+| `firmware_sub` | Parsed radar firmware sub version. |
+| `firmware_modified` | Parsed radar firmware modified field. |
+| `led_r` | Current LED red channel value. |
+| `led_g` | Current LED green channel value. |
+| `led_b` | Current LED blue channel value. |
+| `frame` | Frame counter. |
+| `last_radar_ms` | Milliseconds since the last radar update. |
+| `uptime_ms` | Device uptime in milliseconds. |
+
 
 ## Hardware
 
@@ -34,9 +78,23 @@ flowchart TB
 3. USB-C battery pack
 4. Phone stand
 
-Module link:
+Where to buy:
 
 - Seeed Studio search for the module pack: https://www.seeedstudio.com/catalogsearch/result/?q=MR60BHA2
+- Seeed Studio search for the XIAO ESP32C6: https://www.seeedstudio.com/catalogsearch/result/?q=XIAO+ESP32C6
+- Seeed mmWave product and module listings: https://www.seeedstudio.com/
+
+## Hardware Pins
+
+These are the pins used by `firmware/mr60bha2_console/src/main.cpp`.
+
+| Hardware pin | GPIO |
+| --- | --- |
+| MR60BHA2 UART RX | `GPIO17` |
+| MR60BHA2 UART TX | `GPIO16` |
+| WS2812 RGB LED | `GPIO1` |
+| BH1750 I2C SDA | `GPIO22` |
+| BH1750 I2C SCL | `GPIO23` |
 
 ![Hardware overview](images/hardware-overview.jpg)
 
@@ -57,7 +115,7 @@ firmware/mr60bha2_console/
   src/main.cpp
   data/index.html
 quicksetup/
-  legacy Arduino sketch and notes
+  legacy Arduino sketch
 images/
   screenshots and setup photos used below
 LICENSE
