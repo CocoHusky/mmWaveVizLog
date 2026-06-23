@@ -12,12 +12,7 @@ firmware/mr60bha2_console/
 ```
 
 The firmware reads the sensors, controls the RGB LED, creates the WiFi access
-point, and serves the browser UI from LittleFS. The previous Arduino `.ino`
-version is preserved in:
-
-```text
-backup/arduino_ino/mr60bha2_wifi_bridge_v2.1.2.ino
-```
+point, and serves the browser UI from LittleFS.
 
 ## Build And Upload
 
@@ -37,10 +32,12 @@ The UI filesystem upload is required because `index.html` now lives in
 After upload, connect to WiFi:
 
 ```text
-SSID: MR60BHA2-Bench
-Password: mr60bench
+SSID: mmWaveVisLog-MR60BHA2
+Password: wirelessphysiology
 URL: http://192.168.4.1/
-OTA password: mr60ota
+
+OTA Hostname: mmWaveVisLog-MR60BHA2-OTA
+OTA password: wp-ota
 ```
 
 ## Device Capability Reference
@@ -346,11 +343,11 @@ on the ESP32 before it can receive wireless firmware updates.
 The sketch starts Arduino OTA on the board's own access point.
 
 1. Power the board.
-2. Connect the computer to WiFi `MR60BHA2-Bench`.
-3. Enter password `mr60bench`.
-4. In Arduino IDE, select the network port for hostname `mr60bha2`.
+2. Connect the computer to WiFi `mmWaveVisLog-MR60BHA2`.
+3. Enter password `wirelessphysiology`.
+4. In Arduino IDE, select the network port for hostname `mmWaveVisLog-MR60BHA2-OTA`.
 5. Upload as usual.
-6. When prompted for OTA password, use `mr60ota`.
+6. When prompted for OTA password, use `wp-ota`.
 
 If the OTA network port does not appear, reconnect to the board WiFi and wait a
 few seconds. If OTA fails or a bad sketch breaks WiFi, recover by uploading over
@@ -365,8 +362,8 @@ LED and light support do not require separate Arduino libraries.
 
 ## Open The UI
 
-1. Connect the computer or phone to WiFi `MR60BHA2-Bench`.
-2. Enter password `mr60bench`.
+1. Connect the computer or phone to WiFi `mmWaveVisLog-MR60BHA2`.
+2. Enter password `wirelessphysiology`.
 3. Open `http://192.168.4.1/` in a browser.
 
 This works without any cable except power, but your computer is on the
