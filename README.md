@@ -80,19 +80,19 @@ LICENSE
 
 This is the fastest path for first bring-up and hardware testing.
 
-Install:
+#### 1. First flash over USB
 
 1. Arduino IDE 2.x
 2. ESP32 board support package from Espressif
 3. `Seeed_Arduino_mmWave` from Library Manager
 
-Open:
+Open the legacy sketch and flash it with USB connected:
 
 1. `quicksetup/MR60BHA2_Sensor_VisLog/MR60BHA2_Sensor_VisLog.ino`
 2. Select board `XIAO ESP32C6`
 3. Select the correct USB serial port
 4. Match the board settings shown in the screenshot below
-5. Upload the sketch
+5. Upload the sketch over the wired USB connection
 
 ![Arduino IDE board settings](docs/images/arduino-board-settings.png)
 
@@ -109,6 +109,21 @@ static const char *OTA_HOSTNAME = "mmWaveVisLog-MR60BHA2-OTA";
 static const char *OTA_PASSWORD = "wp-ota";
 static const char *VisLog_FW_VERSION = "2.1.4";
 ```
+
+#### 2. Update over Wi-Fi with OTA
+
+After the wired flash succeeds, switch the board to the OTA Wi-Fi:
+
+1. Connect to `mmWaveVisLog-MR60BHA2`
+2. Use password `wirelessphysiology`
+3. Wait up to 2 minutes for the OTA port to appear in Arduino IDE
+4. Select the OTA port once it shows up
+5. Upload the updated sketch over Wi-Fi
+
+Important:
+
+- the OTA hostname is `mmWaveVisLog-MR60BHA2-OTA`
+- if the OTA port is not visible immediately, keep waiting for the full 2 minutes before retrying
 
 ### PlatformIO
 
