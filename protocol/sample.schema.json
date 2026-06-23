@@ -1,0 +1,266 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/CocoHusky/mmWaveVizLog/protocol/sample.schema.json",
+  "title": "MR60BHA2 Sensor VisLog Sample",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "type",
+    "heart_rate",
+    "breath_rate",
+    "distance",
+    "raw_distance",
+    "total_phase",
+    "breath_phase",
+    "heart_phase",
+    "presence",
+    "presence_valid",
+    "presence_source",
+    "target_valid",
+    "target_source",
+    "people_count",
+    "target_count",
+    "target_x",
+    "target_y",
+    "target_distance",
+    "target_angle",
+    "target_speed",
+    "targets",
+    "light",
+    "light_ready",
+    "console_fw",
+    "firmware_valid",
+    "firmware_raw",
+    "firmware_project",
+    "firmware_major",
+    "firmware_sub",
+    "firmware_modified",
+    "led_r",
+    "led_g",
+    "led_b",
+    "frame",
+    "last_radar_ms",
+    "uptime_ms"
+  ],
+  "properties": {
+    "type": {
+      "const": "sample"
+    },
+    "heart_rate": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Heart rate in beats per minute."
+    },
+    "breath_rate": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Breathing rate in respirations per minute."
+    },
+    "distance": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Normalized radar distance in metres."
+    },
+    "raw_distance": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Raw radar distance before normalization."
+    },
+    "total_phase": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "breath_phase": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "heart_phase": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "presence": {
+      "type": "boolean"
+    },
+    "presence_valid": {
+      "type": "boolean"
+    },
+    "presence_source": {
+      "type": "string"
+    },
+    "target_valid": {
+      "type": "boolean"
+    },
+    "target_source": {
+      "type": "string"
+    },
+    "people_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "target_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "target_x": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "target_y": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "target_distance": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "target_angle": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "target_speed": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "targets": {
+      "type": "array",
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "x",
+          "y",
+          "distance",
+          "angle",
+          "speed",
+          "dop_index",
+          "cluster_index"
+        ],
+        "properties": {
+          "x": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "y": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "distance": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "angle": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "speed": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "dop_index": {
+            "type": "integer"
+          },
+          "cluster_index": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "light": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "light_ready": {
+      "type": "boolean"
+    },
+    "console_fw": {
+      "type": "string"
+    },
+    "firmware_valid": {
+      "type": "boolean"
+    },
+    "firmware_raw": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "firmware_project": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "firmware_major": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "firmware_sub": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "firmware_modified": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "led_r": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255
+    },
+    "led_g": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255
+    },
+    "led_b": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255
+    },
+    "frame": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "last_radar_ms": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "uptime_ms": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}
