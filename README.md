@@ -26,7 +26,6 @@ flowchart TB
 
 ![Radar target tracking preview](docs/images/radar-target-tracking-single.png)
 
-This is the main live view you should expect when the system is running.
 
 ## Hardware
 
