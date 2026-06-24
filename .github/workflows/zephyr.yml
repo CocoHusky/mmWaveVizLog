@@ -9,6 +9,7 @@ env:
   TEST_PATH: zephyr/mr60bha2_console/tests/mr60bha2_parser
   ZEPHYR_REVISION: main
   ZEPHYR_WORKSPACE: zephyr/workspace
+  ZEPHYR_SDK_VERSION: 0.17.0
 
 jobs:
   zephyr:
@@ -28,7 +29,9 @@ jobs:
             device-tree-compiler \
             file \
             g++ \
+            g++-multilib \
             gcc \
+            gcc-multilib \
             gperf \
             libmagic1 \
             libsdl2-dev \
@@ -36,6 +39,7 @@ jobs:
             ninja-build \
             wget \
             xz-utils
+
           python3 -m pip install --user --upgrade pip
           python3 -m pip install --user west jsonschema
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
@@ -46,29 +50,46 @@ jobs:
             -m https://github.com/zephyrproject-rtos/zephyr \
             --mr "$ZEPHYR_REVISION"
 
-      - name: Install Zephyr Python dependencies
+      - name: Update Zephyr workspace
+        working-directory: ${{ env.ZEPHYR_WORKSPACE }}
         run: |
           west update
           west zephyr-export
           python3 -m pip install --user -r zephyr/scripts/requirements.txt
-        working-directory: ${{ env.ZEPHYR_WORKSPACE }}
+
+      - name: Install Zephyr SDK
+        run: |
+          wget "https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${ZEPHYR_SDK_VERSION}/zephyr-sdk-${ZEPHYR_SDK_VERSION}_linux-x86_64_minimal.tar.xz"
+          tar xf "zephyr-sdk-${ZEPHYR_SDK_VERSION}_linux-x86_64_minimal.tar.xz"
+
+          "./zephyr-sdk-${ZEPHYR_SDK_VERSION}/setup.sh" \
+            -t x86_64-zephyr-elf \
+            -h \
+            -c
+
+          echo "ZEPHYR_SDK_INSTALL_DIR=$GITHUB_WORKSPACE/zephyr-sdk-${ZEPHYR_SDK_VERSION}" >> "$GITHUB_ENV"
 
       - name: Build parser tests
+        working-directory: ${{ env.ZEPHYR_WORKSPACE }}
         run: |
           west build \
+            -p always \
             -b native_sim \
             "$GITHUB_WORKSPACE/$TEST_PATH" \
             -d "$GITHUB_WORKSPACE/build/parser-tests"
-        working-directory: ${{ env.ZEPHYR_WORKSPACE }}
+
+      - name: Run parser tests
+        run: |
+          "$GITHUB_WORKSPACE/build/parser-tests/zephyr/zephyr.exe"
 
       - name: Run Twister
+        working-directory: ${{ env.ZEPHYR_WORKSPACE }}
         run: |
           west twister \
             -T "$GITHUB_WORKSPACE/$APP_PATH/tests" \
             --platform native_sim \
             --inline-logs \
             --outdir "$GITHUB_WORKSPACE/build/twister"
-        working-directory: ${{ env.ZEPHYR_WORKSPACE }}
 
       - name: Validate JSON schema examples
         run: |
@@ -81,6 +102,9 @@ jobs:
           schema_path = Path("protocol/sample.schema.json")
           example_paths = sorted(Path("protocol/examples").glob("*.json"))
 
+          if not schema_path.exists():
+              raise SystemExit(f"Schema file not found: {schema_path}")
+
           if not example_paths:
               raise SystemExit("No JSON examples found under protocol/examples")
 
@@ -89,7 +113,11 @@ jobs:
 
           for example_path in example_paths:
               data = json.loads(example_path.read_text())
-              errors = sorted(validator.iter_errors(data), key=lambda error: error.path)
+              errors = sorted(
+                  validator.iter_errors(data),
+                  key=lambda error: list(error.path),
+              )
+
               if errors:
                   for error in errors:
                       location = ".".join(str(part) for part in error.path) or "<root>"
