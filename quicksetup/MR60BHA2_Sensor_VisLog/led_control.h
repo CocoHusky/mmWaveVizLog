@@ -6,6 +6,7 @@
 #include <Arduino.h>
 
 void updateStatusLed();
+void playBootRainbow();
 void handleLedCommand(const String &body);
 
 #endif

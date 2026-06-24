@@ -29,6 +29,25 @@ static void writeStatusLed(uint8_t r, uint8_t g, uint8_t b, float brightness) {
   rgbLedWrite(STATUS_LED_PIN, sensorState.ledR, sensorState.ledG, sensorState.ledB);
 }
 
+void playBootRainbow() {
+  static const uint8_t colors[][3] = {
+      {255, 0, 0},
+      {255, 120, 0},
+      {255, 255, 0},
+      {0, 255, 0},
+      {0, 120, 255},
+      {80, 0, 255},
+      {255, 0, 160},
+  };
+
+  for (uint8_t pass = 0; pass < 2; pass++) {
+    for (uint8_t i = 0; i < sizeof(colors) / sizeof(colors[0]); i++) {
+      writeStatusLed(colors[i][0], colors[i][1], colors[i][2], 0.28f);
+      delay(45);
+    }
+  }
+}
+
 void updateStatusLed() {
   if (statusLed.mode == LedMode::Off) {
     writeStatusLed(0, 0, 0, 1.0f);
