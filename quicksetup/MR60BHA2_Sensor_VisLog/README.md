@@ -1,6 +1,38 @@
 # MR60BHA2 Sensor quick setup
 
-A self-contained Arduino sketch for the Seeed Studio MR60BHA2 mmWave radar module running on a XIAO ESP32-C6. The device creates its own Wi-Fi access point and serves a local web dashboard for live radar, bio-signal, target tracking, ambient light, status LED rules, and session logging.
+A minimal Arduino bring-up reference for the Seeed Studio MR60BHA2 mmWave radar module running on a XIAO ESP32-C6. The device creates its own Wi-Fi access point and serves a local web dashboard for live radar, bio-signal, target tracking, ambient light, status LED rules, and session logging.
+
+```mermaid
+flowchart TB
+  INO["MR60BHA2_Sensor_VisLog.ino"]
+  CFG["vislog_config.h"]
+  TYPES["vislog_types.h"]
+  GLO["vislog_globals.cpp/.h"]
+  RAD["radar_sensor.cpp/.h"]
+  LUX["ambient_light.cpp/.h"]
+  LED["led_control.cpp/.h"]
+  JSON["json_stream.cpp/.h"]
+  WEB["web_server.cpp/.h"]
+  OTA["ota_updates.cpp/.h"]
+  PAGE["dashboard_page.h"]
+
+  INO --> RAD
+  INO --> LUX
+  INO --> LED
+  INO --> JSON
+  INO --> WEB
+  INO --> OTA
+
+  CFG --> TYPES
+  TYPES --> GLO
+  GLO --> RAD
+  GLO --> LUX
+  GLO --> LED
+  GLO --> JSON
+  GLO --> WEB
+  GLO --> OTA
+  WEB --> PAGE
+```
 
 ## What it does
 
@@ -22,6 +54,31 @@ This sketch turns the XIAO ESP32-C6 into a local sensor test bench:
 The multi-target list is frame-based. `Target 1`, `Target 2`, and `Target 3` are the first, second, and third targets reported in the current radar packet. They are not guaranteed persistent identities, so two people can swap target numbers between frames.
 
 The sketch keeps a primary target summary using the first target in the packet. For multi-person testing, use the individual target cards and multi-target plots rather than assuming `Target 1` is always the same person.
+
+## Repository Layout
+
+```text
+quicksetup/MR60BHA2_Sensor_VisLog/
+  MR60BHA2_Sensor_VisLog.ino
+  vislog_config.h
+  vislog_types.h
+  vislog_globals.cpp
+  vislog_globals.h
+  radar_sensor.cpp
+  radar_sensor.h
+  ambient_light.cpp
+  ambient_light.h
+  led_control.cpp
+  led_control.h
+  json_stream.cpp
+  json_stream.h
+  web_server.cpp
+  web_server.h
+  ota_updates.cpp
+  ota_updates.h
+  dashboard_page.h
+  README.md
+```
 
 ## Hardware
 
@@ -73,38 +130,18 @@ Install the following before uploading:
 
 ## Arduino IDE setup
 
-1. Create a folder named:
-
-   ```text
-   MR60BHA2_Sensor_VisLog
-   ```
-
-2. Put this file inside that folder:
-
-   ```text
-   MR60BHA2_Sensor_VisLog.ino
-   ```
-
-3. Open the `.ino` file in Arduino IDE.
-
-4. Select your board. Use `XIAO ESP32-C6` if available. If not, use the closest ESP32-C6 board profile that works with your installed board package.
-
-5. Set the serial monitor to:
-
-   ```text
-   115200 baud
-   ```
-
-6. Upload the sketch over USB (use the correct one on the esp board not the module)
-
-7. Open the serial monitor. You should see startup messages showing the Wi-Fi network, local IP address, OTA hostname, and whether the BH1750 was found.
+1. Open the `quicksetup/MR60BHA2_Sensor_VisLog/` folder in Arduino IDE.
+2. Select your board. Use `XIAO ESP32-C6` if available. If not, use the closest ESP32-C6 board profile that works with your installed board package.
+3. Set the serial monitor to `115200 baud`.
+4. Upload the sketch over USB.
+5. Open the serial monitor. You should see startup messages showing the Wi-Fi network, local IP address, OTA hostname, and whether the BH1750 was found.
 
 ## Wi-Fi and dashboard
 
 After upload, the XIAO creates its own Wi-Fi access point:
 
 ```text
-SSID: VisLog-MR60BHA2
+SSID: mmWaveVisLog-MR60BHA2
 Password: wirelessphysiology
 Dashboard: http://192.168.4.1/
 ```
@@ -222,7 +259,7 @@ Threshold rule example:
 OTA is enabled after the device boots.
 
 ```text
-OTA hostname: VisLog-MR60BHA2-OTA
+OTA hostname: mmWaveVisLog-MR60BHA2-OTA
 OTA password: wp-ota
 ```
 

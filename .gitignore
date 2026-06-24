@@ -16,7 +16,8 @@
 *.swp
 *.swo
 
-# Zypher Workspace
+# Zephyr workspace
 zephyr/workspace/
 .venv/
 build/
+agent.md
