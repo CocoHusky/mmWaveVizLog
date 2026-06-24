@@ -158,7 +158,7 @@ the sensor wiring and board selection.
 
 1. Install Arduino IDE 2.x.
 2. Install the Espressif ESP32 board package in Boards Manager.
-3. Install `Seeed_Arduino_mmWave` in Library Manager.
+3. Install `Seeed_Arduino_mmWave` in Library Manager. (https://github.com/Love4yzp/Seeed-mmWave-library)
 4. Open `arduino/MR60BHA2_Sensor_VisLog/MR60BHA2_Sensor_VisLog.ino`.
 5. Select `XIAO ESP32-C6` and the correct serial port.
 6. Upload once over USB, then use OTA if you want wireless updates.
