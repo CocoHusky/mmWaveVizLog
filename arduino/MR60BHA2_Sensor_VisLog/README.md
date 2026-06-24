@@ -3,18 +3,34 @@
 A minimal Arduino bring-up reference for the Seeed Studio MR60BHA2 mmWave radar module running on a XIAO ESP32-C6. The device creates its own Wi-Fi access point and serves a local web dashboard for live radar, bio-signal, target tracking, ambient light, status LED rules, and session logging.
 
 ```mermaid
-flowchart TB
-  INO["MR60BHA2_Sensor_VisLog.ino"]
-  CFG["vislog_config.h"]
-  TYPES["vislog_types.h"]
-  GLO["vislog_globals.cpp/.h"]
-  RAD["radar_sensor.cpp/.h"]
-  LUX["ambient_light.cpp/.h"]
-  LED["led_control.cpp/.h"]
-  JSON["json_stream.cpp/.h"]
-  WEB["web_server.cpp/.h"]
-  OTA["ota_updates.cpp/.h"]
-  PAGE["dashboard_page.h"]
+flowchart LR
+  subgraph foundation["Foundation"]
+    direction TB
+    CFG["vislog_config.h"]
+    TYPES["vislog_types.h"]
+    GLO["vislog_globals.cpp/.h"]
+    CFG --> TYPES --> GLO
+  end
+
+  subgraph app["Application"]
+    direction TB
+    INO["MR60BHA2_Sensor_VisLog.ino"]
+  end
+
+  subgraph services["Services"]
+    direction TB
+    RAD["radar_sensor.cpp/.h"]
+    LUX["ambient_light.cpp/.h"]
+    LED["led_control.cpp/.h"]
+    JSON["json_stream.cpp/.h"]
+    WEB["web_server.cpp/.h"]
+    OTA["ota_updates.cpp/.h"]
+  end
+
+  subgraph ui["UI"]
+    direction TB
+    PAGE["dashboard_page.h"]
+  end
 
   INO --> RAD
   INO --> LUX
@@ -23,8 +39,6 @@ flowchart TB
   INO --> WEB
   INO --> OTA
 
-  CFG --> TYPES
-  TYPES --> GLO
   GLO --> RAD
   GLO --> LUX
   GLO --> LED
