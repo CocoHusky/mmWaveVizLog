@@ -3,9 +3,10 @@
 ## Summary
 
 MR60BHA2 Sensor VisLog is a local radar console for the Seeed MR60BHA2 on a
-XIAO ESP32-C6. The Arduino quicksetup under `arduino/` is the fastest way
-to bring the hardware up and verify wiring. The Zephyr firmware under
-`zephyr/mr60bha2_console/` is the production runtime in this repository.
+XIAO ESP32-C6. The maintained runtime lives in `zephyr/mr60bha2_console/`.
+The Arduino project under `arduino/MR60BHA2_Sensor_VisLog/` is a bring-up and
+hardware-reference path for quickly verifying wiring, board selection, Wi-Fi,
+and sensor behavior.
 
 It can collect:
 
@@ -137,24 +138,48 @@ Selected reading and public links:
 
 ## Repo Layout
 
+Tracked source files are kept under the firmware, protocol, documentation, and
+asset directories. Generated Zephyr outputs belong in ignored local paths such
+as `build/` and `zephyr/workspace/`.
+
 ```text
-zephyr/mr60bha2_console/
-  CMakeLists.txt
-  prj.conf
-  src/
-arduino/
-  minimal Arduino bring-up reference
+arduino/MR60BHA2_Sensor_VisLog/
+  Arduino bring-up and hardware-reference firmware
 images/
-  screenshots and setup photos used below
+  screenshots and setup photos used by the documentation
+protocol/
+  JSON schema and serial stream notes
+zephyr/mr60bha2_console/
+  maintained Zephyr firmware runtime
 LICENSE
+README.md
 ```
+
+The ideal repository tree should stay close to this:
+
+```text
+.
+|-- arduino/
+|   `-- MR60BHA2_Sensor_VisLog/
+|-- images/
+|-- protocol/
+|-- zephyr/
+|   `-- mr60bha2_console/
+|-- .gitignore
+|-- LICENSE
+`-- README.md
+```
+
+Do not commit local build products, Zephyr workspaces, editor caches, or macOS
+metadata files.
 
 ## Quick Setup
 
 ### Arduino quick setup
 
-Use this first when you want a minimal bring-up reference or need to confirm
-the sensor wiring and board selection.
+Use this when you need a minimal bring-up reference or need to confirm the
+sensor wiring and board selection before working on the maintained Zephyr
+runtime.
 
 1. Install Arduino IDE 2.x.
 2. Install the Espressif ESP32 board package in Boards Manager.
@@ -167,8 +192,7 @@ the sensor wiring and board selection.
 
 ### Zephyr production setup
 
-Use Zephyr when you want the maintained production firmware path in this
-repository.
+Use Zephyr for the maintained firmware path in this repository.
 
 1. Install the Zephyr workspace and toolchain described in
    [`zephyr/mr60bha2_console/README.md`](zephyr/mr60bha2_console/README.md).

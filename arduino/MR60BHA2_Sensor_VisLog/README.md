@@ -1,6 +1,11 @@
 # MR60BHA2 Sensor quick setup
 
-A minimal Arduino bring-up reference for the Seeed Studio MR60BHA2 mmWave radar module running on a XIAO ESP32-C6. The device creates its own Wi-Fi access point and serves a local web dashboard for live radar, bio-signal, target tracking, ambient light, status LED rules, and session logging.
+A minimal Arduino bring-up reference for the Seeed Studio MR60BHA2 mmWave radar
+module running on a XIAO ESP32-C6. Use this path to verify hardware wiring,
+board setup, Wi-Fi, and sensor behavior before working on the maintained Zephyr
+runtime. The device creates its own Wi-Fi access point and serves a local web
+dashboard for live radar, bio-signal, target tracking, ambient light, status LED
+rules, and session logging.
 
 ```mermaid
 flowchart LR

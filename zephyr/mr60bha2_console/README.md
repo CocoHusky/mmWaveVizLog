@@ -1,9 +1,9 @@
 # MR60BHA2 Zephyr Console
 
 Zephyr firmware for the XIAO ESP32-C6 and Seeed MR60BHA2 sensor stack. This
-path is the primary device runtime in this repository and keeps the same sample
-schema, dashboard behavior, LED control, and OTA flow used by the other
-firmware variants.
+path is the maintained runtime in this repository and keeps the sample schema,
+dashboard behavior, LED control, and OTA flow aligned with the Arduino bring-up
+reference.
 
 ## Runtime Goals
 
