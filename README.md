@@ -3,7 +3,7 @@
 ## Summary
 
 MR60BHA2 Sensor VisLog is a local radar console for the Seeed MR60BHA2 on a
-XIAO ESP32-C6. The Arduino quicksetup under `quicksetup/` is the fastest way
+XIAO ESP32-C6. The Arduino quicksetup under `arduino/` is the fastest way
 to bring the hardware up and verify wiring. The Zephyr firmware under
 `zephyr/mr60bha2_console/` is the production runtime in this repository.
 
@@ -89,7 +89,7 @@ Where to buy:
 
 ## Hardware Pins
 
-These are the pins used by `quicksetup/MR60BHA2_Sensor_VisLog/MR60BHA2_Sensor_VisLog.ino`.
+These are the pins used by `arduino/MR60BHA2_Sensor_VisLog/MR60BHA2_Sensor_VisLog.ino`.
 
 | Hardware pin | GPIO |
 | --- | --- |
@@ -142,7 +142,7 @@ zephyr/mr60bha2_console/
   CMakeLists.txt
   prj.conf
   src/
-quicksetup/
+arduino/
   minimal Arduino bring-up reference
 images/
   screenshots and setup photos used below
@@ -159,7 +159,7 @@ the sensor wiring and board selection.
 1. Install Arduino IDE 2.x.
 2. Install the Espressif ESP32 board package in Boards Manager.
 3. Install `Seeed_Arduino_mmWave` in Library Manager.
-4. Open `quicksetup/MR60BHA2_Sensor_VisLog/MR60BHA2_Sensor_VisLog.ino`.
+4. Open `arduino/MR60BHA2_Sensor_VisLog/MR60BHA2_Sensor_VisLog.ino`.
 5. Select `XIAO ESP32-C6` and the correct serial port.
 6. Upload once over USB, then use OTA if you want wireless updates.
    After upload, give the board a few seconds to bring up Wi-Fi and OTA before assuming it failed.
