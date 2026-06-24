@@ -75,10 +75,10 @@ void loop() {
     return;
   }
 
+  uint32_t now = millis();
   pollRadarSensor();
   refreshPresenceState();
   pollAmbientLight();
-  uint32_t now = millis();
   if (now - lastStatusLedUpdateMs >= STATUS_LED_UPDATE_INTERVAL_MS) {
     lastStatusLedUpdateMs = now;
     updateStatusLed();

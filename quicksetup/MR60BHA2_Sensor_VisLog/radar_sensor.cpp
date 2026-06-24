@@ -149,7 +149,7 @@ void pollRadarSensor() {
   refreshPresenceState();
 
   if (changed) {
-    sensorState.frame++;
+    sensorState.radarFrame++;
     sensorState.lastRadarMs = millis();
   }
 }

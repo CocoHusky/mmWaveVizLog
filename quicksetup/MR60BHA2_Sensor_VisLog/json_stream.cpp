@@ -9,6 +9,8 @@ static String jsonNumber(float value, unsigned int digits) {
 }
 
 String buildSensorStateJson() {
+  sensorState.frame++;
+
   String json;
   json.reserve(1180);
   json = "{";
@@ -58,6 +60,7 @@ String buildSensorStateJson() {
   json += "\"led_g\":" + String(sensorState.ledG) + ",";
   json += "\"led_b\":" + String(sensorState.ledB) + ",";
   json += "\"frame\":" + String(sensorState.frame) + ",";
+  json += "\"radar_frame\":" + String(sensorState.radarFrame) + ",";
   json += "\"last_radar_ms\":" + String(sensorState.lastRadarMs) + ",";
   json += "\"uptime_ms\":" + String(millis());
   json += "}";

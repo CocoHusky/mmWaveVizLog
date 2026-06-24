@@ -49,6 +49,7 @@ struct SensorSnapshot {
   uint8_t ledG = 0;
   uint8_t ledB = 0;
   uint32_t frame = 0;
+  uint32_t radarFrame = 0;
   uint32_t lastRadarMs = 0;
   uint32_t lastPresenceMs = 0;
   uint32_t lastTargetMs = 0;

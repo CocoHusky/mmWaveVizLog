@@ -271,6 +271,8 @@ After upload or reset, Wi-Fi and OTA can take a few seconds to appear. If the ac
 
 For lower data latency, OTA is polled periodically while idle instead of on every sensor loop. Once an upload starts, OTA handling switches to continuous service. For faster uploads, the sketch pauses radar/light/LED polling only while an OTA upload is actively in progress. This is controlled by `OTA_PAUSES_SENSOR_COLLECTION` in `vislog_config.h`. Set it to `false` only if you prefer sensor collection to continue during OTA; uploads will be slower and less reliable.
 
+The dashboard frame-rate field shows both browser/API sample cadence and parsed radar-report cadence. `Sample` is measured from successful `/api/sample` responses. `Sensor` is how often the MR60BHA2 emits decoded data such as heart rate, breathing rate, phase, or targets. Both rates are displayed as one-second averages to avoid noisy instantaneous readings.
+
 Use OTA only on a trusted local network. The access point password and OTA password are hard-coded in the sketch, so change them before using this outside a controlled test setup.
 If OTA reports `No response from device`, the board is usually not yet on its AP or not reachable at `192.168.4.1`; reconnect over USB, wait for the boot messages, then retry.
 
