@@ -58,7 +58,7 @@ The sketch keeps a primary target summary using the first target in the packet. 
 ## Repository Layout
 
 ```text
-quicksetup/MR60BHA2_Sensor_VisLog/
+arduino/MR60BHA2_Sensor_VisLog/
   MR60BHA2_Sensor_VisLog.ino
   vislog_config.h
   vislog_types.h
@@ -130,7 +130,7 @@ Install the following before uploading:
 
 ## Arduino IDE setup
 
-1. Open the `quicksetup/MR60BHA2_Sensor_VisLog/` folder in Arduino IDE.
+1. Open the `arduino/MR60BHA2_Sensor_VisLog/` folder in Arduino IDE.
 2. Select your board. Use `XIAO ESP32-C6` if available. If not, use the closest ESP32-C6 board profile that works with your installed board package.
 3. Set the serial monitor to `115200 baud`.
 4. Upload the sketch over USB.
