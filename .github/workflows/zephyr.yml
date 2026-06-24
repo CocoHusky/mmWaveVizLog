@@ -1,0 +1,100 @@
+name: Zephyr CI
+
+on:
+  push:
+  pull_request:
+
+env:
+  APP_PATH: zephyr/mr60bha2_console
+  TEST_PATH: zephyr/mr60bha2_console/tests/mr60bha2_parser
+  ZEPHYR_REVISION: main
+  ZEPHYR_WORKSPACE: zephyr/workspace
+
+jobs:
+  zephyr:
+    name: Parser, Twister, and schema validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install host dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y \
+            ccache \
+            cmake \
+            device-tree-compiler \
+            file \
+            g++ \
+            gcc \
+            gperf \
+            libmagic1 \
+            libsdl2-dev \
+            make \
+            ninja-build \
+            wget \
+            xz-utils
+          python3 -m pip install --user --upgrade pip
+          python3 -m pip install --user west jsonschema
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Initialize Zephyr workspace
+        run: |
+          west init "$ZEPHYR_WORKSPACE" \
+            -m https://github.com/zephyrproject-rtos/zephyr \
+            --mr "$ZEPHYR_REVISION"
+
+      - name: Install Zephyr Python dependencies
+        run: |
+          west update
+          west zephyr-export
+          python3 -m pip install --user -r zephyr/scripts/requirements.txt
+        working-directory: ${{ env.ZEPHYR_WORKSPACE }}
+
+      - name: Build parser tests
+        run: |
+          west build \
+            -b native_sim \
+            "$GITHUB_WORKSPACE/$TEST_PATH" \
+            -d "$GITHUB_WORKSPACE/build/parser-tests"
+        working-directory: ${{ env.ZEPHYR_WORKSPACE }}
+
+      - name: Run Twister
+        run: |
+          west twister \
+            -T "$GITHUB_WORKSPACE/$APP_PATH/tests" \
+            --platform native_sim \
+            --inline-logs \
+            --outdir "$GITHUB_WORKSPACE/build/twister"
+        working-directory: ${{ env.ZEPHYR_WORKSPACE }}
+
+      - name: Validate JSON schema examples
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          import jsonschema
+
+          schema_path = Path("protocol/sample.schema.json")
+          example_paths = sorted(Path("protocol/examples").glob("*.json"))
+
+          if not example_paths:
+              raise SystemExit("No JSON examples found under protocol/examples")
+
+          schema = json.loads(schema_path.read_text())
+          validator = jsonschema.Draft202012Validator(schema)
+
+          for example_path in example_paths:
+              data = json.loads(example_path.read_text())
+              errors = sorted(validator.iter_errors(data), key=lambda error: error.path)
+              if errors:
+                  for error in errors:
+                      location = ".".join(str(part) for part in error.path) or "<root>"
+                      print(f"{example_path}:{location}: {error.message}")
+                  raise SystemExit(1)
+
+          print(f"Validated {len(example_paths)} JSON example(s)")
+          PY
