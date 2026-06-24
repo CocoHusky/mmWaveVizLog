@@ -1,0 +1,173 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+env:
+  APP_PATH: zephyr/mr60bha2_console
+  TEST_PATH: zephyr/mr60bha2_console/tests/mr60bha2_parser
+  ZEPHYR_REVISION: main
+  ZEPHYR_WORKSPACE: zephyr/workspace
+  ZEPHYR_SDK_VERSION: 0.17.0
+
+jobs:
+  release:
+    name: Build and publish release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install host dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y \
+            ccache \
+            cmake \
+            device-tree-compiler \
+            file \
+            g++ \
+            g++-multilib \
+            gcc \
+            gcc-multilib \
+            gperf \
+            libmagic1 \
+            libsdl2-dev \
+            make \
+            ninja-build \
+            wget \
+            xz-utils \
+            zip
+
+          python3 -m pip install --user --upgrade pip
+          python3 -m pip install --user west jsonschema
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Initialize Zephyr workspace
+        run: |
+          west init "$ZEPHYR_WORKSPACE" \
+            -m https://github.com/zephyrproject-rtos/zephyr \
+            --mr "$ZEPHYR_REVISION"
+
+      - name: Update Zephyr workspace
+        working-directory: ${{ env.ZEPHYR_WORKSPACE }}
+        run: |
+          west update
+          west zephyr-export
+          python3 -m pip install --user -r zephyr/scripts/requirements.txt
+
+      - name: Install Zephyr SDK
+        run: |
+          wget "https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${ZEPHYR_SDK_VERSION}/zephyr-sdk-${ZEPHYR_SDK_VERSION}_linux-x86_64_minimal.tar.xz"
+          tar xf "zephyr-sdk-${ZEPHYR_SDK_VERSION}_linux-x86_64_minimal.tar.xz"
+
+          "./zephyr-sdk-${ZEPHYR_SDK_VERSION}/setup.sh" \
+            -t x86_64-zephyr-elf \
+            -h \
+            -c
+
+          echo "ZEPHYR_SDK_INSTALL_DIR=$GITHUB_WORKSPACE/zephyr-sdk-${ZEPHYR_SDK_VERSION}" >> "$GITHUB_ENV"
+
+      - name: Build native_sim parser test
+        working-directory: ${{ env.ZEPHYR_WORKSPACE }}
+        run: |
+          west build \
+            -p always \
+            -b native_sim \
+            "$GITHUB_WORKSPACE/$TEST_PATH" \
+            -d "$GITHUB_WORKSPACE/build/parser-tests"
+
+      - name: Run native_sim parser test
+        run: |
+          "$GITHUB_WORKSPACE/build/parser-tests/zephyr/zephyr.exe"
+
+      - name: Validate JSON schema examples
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          import jsonschema
+
+          schema_path = Path("protocol/sample.schema.json")
+          example_paths = sorted(Path("protocol/examples").glob("*.json"))
+
+          if not schema_path.exists():
+              raise SystemExit(f"Schema file not found: {schema_path}")
+
+          if not example_paths:
+              raise SystemExit("No JSON examples found under protocol/examples")
+
+          schema = json.loads(schema_path.read_text())
+          validator = jsonschema.Draft202012Validator(schema)
+
+          for example_path in example_paths:
+              data = json.loads(example_path.read_text())
+              errors = sorted(
+                  validator.iter_errors(data),
+                  key=lambda error: list(error.path),
+              )
+
+              if errors:
+                  for error in errors:
+                      location = ".".join(str(part) for part in error.path) or "<root>"
+                      print(f"{example_path}:{location}: {error.message}")
+                  raise SystemExit(1)
+
+          print(f"Validated {len(example_paths)} JSON example(s)")
+          PY
+
+      - name: Package release artifacts
+        run: |
+          mkdir -p release
+
+          cp "$GITHUB_WORKSPACE/build/parser-tests/zephyr/zephyr.exe" \
+            release/mmwavevizlog-parser-native_sim-${GITHUB_REF_NAME}.exe
+
+          cp "$GITHUB_WORKSPACE/build/parser-tests/zephyr/zephyr.elf" \
+            release/mmwavevizlog-parser-native_sim-${GITHUB_REF_NAME}.elf
+
+          cp "$GITHUB_WORKSPACE/build/parser-tests/zephyr/zephyr.map" \
+            release/mmwavevizlog-parser-native_sim-${GITHUB_REF_NAME}.map
+
+          cp protocol/sample.schema.json \
+            release/mmwavevizlog-sample-schema-${GITHUB_REF_NAME}.json
+
+          zip -r \
+            release/mmwavevizlog-protocol-examples-${GITHUB_REF_NAME}.zip \
+            protocol/examples
+
+          cat > release/RELEASE_NOTES.txt <<EOF
+          mmWaveVizLog ${GITHUB_REF_NAME}
+
+          Included artifacts:
+          - Native simulator parser executable
+          - Zephyr ELF
+          - Zephyr map file
+          - Protocol JSON schema
+          - Protocol JSON examples
+
+          Built from commit:
+          ${GITHUB_SHA}
+          EOF
+
+          ls -lah release
+
+      - name: Upload workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: mmwavevizlog-release-${{ github.ref_name }}
+          path: release/*
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: mmWaveVizLog ${{ github.ref_name }}
+          body_path: release/RELEASE_NOTES.txt
+          files: release/*
