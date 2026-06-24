@@ -73,17 +73,57 @@ west --version
 
 ### 2. Create the local Zephyr workspace
 
-Run this from the repository root:
+Run these steps from the repository root. They create the local Zephyr checkout
+that the app build depends on.
 
-```sh
-cd /Users/username/Documents/GitHub/mmWaveVizLog
-mkdir -p zephyr/workspace
-cd zephyr/workspace
-west init
-west update
-west zephyr-export
-python3 -m pip install --user -r zephyr/scripts/requirements.txt
-```
+1. Go to the repository root.
+
+   ```sh
+   cd /Users/username/Documents/GitHub/mmWaveVizLog
+   ```
+
+   This puts you at the top of the project before creating the Zephyr workspace.
+
+2. Create the workspace directory and enter it.
+
+   ```sh
+   mkdir -p zephyr/workspace
+   cd zephyr/workspace
+   ```
+
+   This is where `west` will place the Zephyr source tree and modules.
+
+3. Initialize `west`.
+
+   ```sh
+   west init
+   ```
+
+   This creates the workspace metadata and links it to the Zephyr manifest.
+
+4. Download the Zephyr repositories.
+
+   ```sh
+   west update
+   ```
+
+   This fetches Zephyr, modules, and the required dependencies.
+
+5. Export Zephyr package metadata for the local shell.
+
+   ```sh
+   west zephyr-export
+   ```
+
+   This makes the Zephyr Python packages visible to the current environment.
+
+6. Install the Zephyr Python requirements.
+
+   ```sh
+   python3 -m pip install --user -r zephyr/scripts/requirements.txt
+   ```
+
+   This installs the Python tooling Zephyr needs for builds and scripts.
 
 After this, the local tree should look like:
 
