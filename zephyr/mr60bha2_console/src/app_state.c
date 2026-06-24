@@ -8,7 +8,8 @@
 #include <zephyr/kernel.h>
 #include <zephyr/sys/util.h>
 
-#define VISLOG_FW_VERSION "2.1.4"
+#define VISLOG_FW_VERSION "2.2.1"
+#define VISLOG_FW_LABEL "Zephyr "
 
 static struct vislog_sample latest;
 static struct k_mutex latest_lock;
@@ -53,7 +54,8 @@ static void set_default_sample(struct vislog_sample *sample)
 
 	copy_string(sample->presence_source, sizeof(sample->presence_source), "waiting");
 	copy_string(sample->target_source, sizeof(sample->target_source), "waiting");
-	copy_string(sample->console_fw, sizeof(sample->console_fw), VISLOG_FW_VERSION);
+	(void)snprintf(sample->console_fw, sizeof(sample->console_fw), "%s%s",
+		       VISLOG_FW_LABEL, VISLOG_FW_VERSION);
 }
 
 void vislog_app_state_init(void)
@@ -177,7 +179,8 @@ void vislog_app_state_apply_radar_snapshot(const struct mr60bha2_snapshot *snaps
 		clear_target_fields(&latest);
 		copy_string(latest.target_source, sizeof(latest.target_source), "stale");
 	}
-	copy_string(latest.console_fw, sizeof(latest.console_fw), VISLOG_FW_VERSION);
+	(void)snprintf(latest.console_fw, sizeof(latest.console_fw), "%s%s",
+		       VISLOG_FW_LABEL, VISLOG_FW_VERSION);
 
 	k_mutex_unlock(&latest_lock);
 }
