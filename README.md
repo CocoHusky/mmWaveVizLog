@@ -175,7 +175,7 @@ metadata files.
 
 ## Quick Setup
 
-### Arduino quick setup
+### Arduino Bring-Up Reference
 
 Use this when you need a minimal bring-up reference or need to confirm the
 sensor wiring and board selection before working on the maintained Zephyr
@@ -190,7 +190,7 @@ runtime.
    After upload, give the board a few seconds to bring up Wi-Fi and OTA before assuming it failed.
    OTA only works after the sketch is already running and the board is reachable on its Wi-Fi AP.
 
-### Zephyr production setup
+### Zephyr Maintained Runtime
 
 Use Zephyr for the maintained firmware path in this repository.
 
