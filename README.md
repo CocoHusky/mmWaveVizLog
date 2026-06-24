@@ -2,7 +2,10 @@
 
 ## Summary
 
-MR60BHA2 Sensor VisLog is a quick-setup radar console for the Seeed MR60BHA2 on a XIAO ESP32-C6. It is meant for initial testing, live sensing, and data logging before you build a larger app around the hardware.
+MR60BHA2 Sensor VisLog is a local radar console for the Seeed MR60BHA2 on a
+XIAO ESP32-C6. The Zephyr firmware under `zephyr/mr60bha2_console/` is the
+primary runtime in this repository. The Arduino quicksetup remains as a wiring
+and behavior reference.
 
 It can collect:
 
@@ -28,9 +31,9 @@ flowchart TB
 
 ![Radar target tracking preview](images/radar-target-tracking-single.png)
 
-## Current JSON Output
+## JSON Output
 
-Fields returned by `sampleJson()`:
+Fields returned by the runtime sample stream:
 
 | JSON field | Meaning |
 | --- | --- |
@@ -86,7 +89,7 @@ Where to buy:
 
 ## Hardware Pins
 
-These are the pins used by `firmware/mr60bha2_console/src/main.cpp`.
+These are the pins used by `quicksetup/MR60BHA2_Sensor_VisLog/MR60BHA2_Sensor_VisLog.ino`.
 
 | Hardware pin | GPIO |
 | --- | --- |
@@ -135,12 +138,12 @@ Selected reading and public links:
 ## Repo Layout
 
 ```text
-firmware/mr60bha2_console/
-  platformio.ini
-  src/main.cpp
-  data/index.html
+zephyr/mr60bha2_console/
+  CMakeLists.txt
+  prj.conf
+  src/
 quicksetup/
-  legacy Arduino sketch
+  minimal Arduino bring-up reference
 images/
   screenshots and setup photos used below
 LICENSE
@@ -148,73 +151,44 @@ LICENSE
 
 ## Quick Setup
 
-### Arduino IDE
+### Zephyr firmware
 
-This is the fastest path for first bring-up and hardware testing.
+This is the production firmware path in the repository.
 
-#### 1. Install the tools
+1. Install the Zephyr workspace and toolchain described in
+   [`zephyr/mr60bha2_console/README.md`](zephyr/mr60bha2_console/README.md).
+2. Build the app from the repository root:
 
-Install these first:
+   ```sh
+   cd /Users/alexburton/Documents/GitHub/mmWaveVizLog
+   export ZEPHYR_BASE="$PWD/zephyr/workspace/zephyr"
+   export ZEPHYR_TOOLCHAIN_VARIANT=zephyr
+   west build -b xiao_esp32c6/esp32c6/hpcore zephyr/mr60bha2_console
+   ```
 
-1. Arduino IDE 2.x
-2. ESP32 board support package from Espressif through Boards Manager
-3. `Seeed_Arduino_mmWave` through Library Manager
+3. Flash the board with the connected USB-C cable.
+4. Open the dashboard at `http://192.168.4.1/` after connecting to the device AP.
 
-#### 2. First flash over USB
+### Arduino reference
 
-Open the legacy sketch and flash it with USB connected:
+The Arduino reference in `quicksetup/` is kept as a wiring and behavior reference.
 
-1. `quicksetup/MR60BHA2_Sensor_VisLog/MR60BHA2_Sensor_VisLog.ino`
-2. In Tools > Board, choose `XIAO ESP32C6` from the ESP32 board list
-3. If `XIAO ESP32C6` is missing, open Boards Manager and install or update the Espressif ESP32 package, then reload the board list
-4. Select the correct USB serial port in Tools > Port
-5. Match the board settings shown in the screenshot below
-6. Upload the sketch over the wired USB connection
+1. Install Arduino IDE 2.x.
+2. Install the Espressif ESP32 board package in Boards Manager.
+3. Install `Seeed_Arduino_mmWave` in Library Manager.
+4. Open `quicksetup/MR60BHA2_Sensor_VisLog/MR60BHA2_Sensor_VisLog.ino`.
+5. Select `XIAO ESP32-C6` and the correct serial port.
+6. Upload once over USB, then use OTA if you want wireless updates.
 
-![Arduino IDE board settings](images/arduino-board-settings.png)
+## Troubleshooting
 
-![Arduino IDE upload](images/arduino-ide-upload.png)
+If the upload fails or the board does not come back on Wi-Fi after flashing the XIAO ESP32-C6, put it into bootloader mode and try again:
 
-![Arduino programming setup](images/arduino-programming-setup.png)
-
-Use these exact firmware values in your setup notes:
-
-```cpp
-static const char *WIFI_AP_SSID = "mmWaveVisLog-MR60BHA2";
-static const char *WIFI_AP_PASSWORD = "wirelessphysiology";
-static const char *OTA_HOSTNAME = "mmWaveVisLog-MR60BHA2-OTA";
-static const char *OTA_PASSWORD = "wp-ota";
-static const char *VisLog_FW_VERSION = "2.1.4";
-```
-
-#### 3. Update over Wi-Fi with OTA
-
-OTA is optional. Use it for small tweaks when you do not want to reconnect USB-C every time.
-
-After the wired flash succeeds:
-
-1. Connect to `mmWaveVisLog-MR60BHA2`
-2. Use password `wirelessphysiology`
-3. Wait up to 2 minutes for the OTA port to appear in Arduino IDE
-4. Select the OTA port once it shows up
-5. Upload the updated sketch over Wi-Fi
-
-Important:
-
-- OTA hostname: `mmWaveVisLog-MR60BHA2-OTA`
-- If the OTA port is not visible immediately, keep waiting for the full 2 minutes before retrying
-
-### PlatformIO
-
-This repo’s main firmware lives in PlatformIO format.
-
-```sh
-cd firmware/mr60bha2_console
-pio run
-pio run --target upload
-pio run --target uploadfs
-pio device monitor
-```
+1. Unplug USB.
+2. Hold the `BOOT` button.
+3. While holding `BOOT`, plug USB back in.
+4. Keep holding for about 1 to 2 seconds after it powers up, then release.
+5. Start the upload again.
 
 ## Open The UI
 

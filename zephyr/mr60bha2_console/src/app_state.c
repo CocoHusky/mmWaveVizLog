@@ -8,7 +8,7 @@
 #include <zephyr/kernel.h>
 #include <zephyr/sys/util.h>
 
-#define VISLOG_FW_VERSION "2.1.4-zephyr"
+#define VISLOG_FW_VERSION "2.1.4"
 
 static struct vislog_sample latest;
 static struct k_mutex latest_lock;
@@ -39,6 +39,9 @@ static void set_default_sample(struct vislog_sample *sample)
 	sample->target_angle = NAN;
 	sample->target_speed = NAN;
 	sample->light = NAN;
+	sample->last_presence_ms = 0;
+	sample->last_target_ms = 0;
+	sample->last_firmware_ms = 0;
 
 	for (size_t i = 0; i < ARRAY_SIZE(sample->targets); i++) {
 		sample->targets[i].x = NAN;
@@ -59,7 +62,29 @@ void vislog_app_state_init(void)
 	set_default_sample(&latest);
 }
 
-void vislog_app_state_update_simulated(void)
+static void clear_target_fields(struct vislog_sample *sample)
+{
+	sample->target_valid = false;
+	sample->target_count = 0;
+	sample->target_x = NAN;
+	sample->target_y = NAN;
+	sample->target_distance = NAN;
+	sample->target_angle = NAN;
+	sample->target_speed = NAN;
+
+	for (size_t i = 0; i < ARRAY_SIZE(sample->targets); i++) {
+		sample->targets[i].valid = false;
+		sample->targets[i].x = NAN;
+		sample->targets[i].y = NAN;
+		sample->targets[i].distance = NAN;
+		sample->targets[i].angle = NAN;
+		sample->targets[i].speed = NAN;
+		sample->targets[i].dop_index = 0;
+		sample->targets[i].cluster_index = 0;
+	}
+}
+
+void vislog_app_state_apply_radar_snapshot(const struct mr60bha2_snapshot *snapshot)
 {
 	k_mutex_lock(&latest_lock, K_FOREVER);
 
@@ -67,48 +92,92 @@ void vislog_app_state_update_simulated(void)
 	latest.uptime_ms = (uint32_t)k_uptime_get();
 	latest.last_radar_ms = latest.uptime_ms;
 
-	const uint32_t phase = latest.frame % 40U;
-	const float sweep = (float)phase / 40.0f;
+	if (snapshot != NULL) {
+		if (isfinite(snapshot->heart_rate)) {
+			latest.heart_rate = snapshot->heart_rate;
+		}
+		if (isfinite(snapshot->breath_rate)) {
+			latest.breath_rate = snapshot->breath_rate;
+		}
+		if (isfinite(snapshot->distance)) {
+			latest.distance = snapshot->distance;
+		}
+		if (isfinite(snapshot->raw_distance)) {
+			latest.raw_distance = snapshot->raw_distance;
+		}
+		if (isfinite(snapshot->total_phase)) {
+			latest.total_phase = snapshot->total_phase;
+		}
+		if (isfinite(snapshot->breath_phase)) {
+			latest.breath_phase = snapshot->breath_phase;
+		}
+		if (isfinite(snapshot->heart_phase)) {
+			latest.heart_phase = snapshot->heart_phase;
+		}
+		if (snapshot->presence_valid) {
+			latest.presence = snapshot->presence;
+			latest.presence_valid = true;
+			latest.last_presence_ms = latest.uptime_ms;
+			copy_string(latest.presence_source, sizeof(latest.presence_source), snapshot->presence_source);
+		}
+		if (snapshot->target_valid) {
+			latest.target_valid = true;
+			latest.last_target_ms = latest.uptime_ms;
+			latest.target_count = snapshot->target_count;
+			copy_string(latest.target_source, sizeof(latest.target_source), snapshot->target_source);
 
-	latest.heart_rate = 72.0f + (sweep * 3.0f);
-	latest.breath_rate = 16.0f + (sweep * 1.5f);
-	latest.distance = 0.70f + (sweep * 0.08f);
-	latest.raw_distance = latest.distance;
-	latest.total_phase = 0.10f + (sweep * 0.04f);
-	latest.breath_phase = 0.05f + (sweep * 0.02f);
-	latest.heart_phase = 0.02f + (sweep * 0.01f);
+			for (size_t i = 0; i < ARRAY_SIZE(latest.targets); i++) {
+				latest.targets[i].valid = false;
+				latest.targets[i].x = NAN;
+				latest.targets[i].y = NAN;
+				latest.targets[i].distance = NAN;
+				latest.targets[i].angle = NAN;
+				latest.targets[i].speed = NAN;
+				latest.targets[i].dop_index = 0;
+				latest.targets[i].cluster_index = 0;
+			}
 
-	latest.presence = true;
-	latest.presence_valid = true;
-	copy_string(latest.presence_source, sizeof(latest.presence_source), "sim");
-
-	latest.target_valid = true;
-	copy_string(latest.target_source, sizeof(latest.target_source), "sim");
-	latest.target_count = 1;
-	latest.target_x = -0.08f + (sweep * 0.03f);
-	latest.target_y = latest.distance;
-	latest.target_distance = latest.distance;
-	latest.target_angle = -6.3f + (sweep * 1.8f);
-	latest.target_speed = 0.0f;
-
-	latest.targets[0].valid = true;
-	latest.targets[0].x = latest.target_x;
-	latest.targets[0].y = latest.target_y;
-	latest.targets[0].distance = latest.target_distance;
-	latest.targets[0].angle = latest.target_angle;
-	latest.targets[0].speed = latest.target_speed;
-	latest.targets[0].dop_index = 0;
-	latest.targets[0].cluster_index = 0;
-
-	for (size_t i = 1; i < ARRAY_SIZE(latest.targets); i++) {
-		latest.targets[i].valid = false;
+			for (size_t i = 0; i < latest.target_count && i < ARRAY_SIZE(latest.targets); i++) {
+				latest.targets[i].valid = snapshot->targets[i].valid;
+				latest.targets[i].x = snapshot->targets[i].x;
+				latest.targets[i].y = snapshot->targets[i].y;
+				latest.targets[i].distance = snapshot->targets[i].distance;
+				latest.targets[i].angle = snapshot->targets[i].angle;
+				latest.targets[i].speed = snapshot->targets[i].speed;
+				latest.targets[i].dop_index = snapshot->targets[i].dop_index;
+				latest.targets[i].cluster_index = snapshot->targets[i].cluster_index;
+			}
+			if (latest.target_count > 0 && latest.targets[0].valid) {
+				latest.target_x = latest.targets[0].x;
+				latest.target_y = latest.targets[0].y;
+				latest.target_distance = latest.targets[0].distance;
+				latest.target_angle = latest.targets[0].angle;
+				latest.target_speed = latest.targets[0].speed;
+			}
+		}
+		if (snapshot->firmware_valid) {
+			latest.firmware_valid = true;
+			latest.last_firmware_ms = latest.uptime_ms;
+			latest.firmware_raw = snapshot->firmware_raw;
+			latest.firmware_project = snapshot->firmware_project;
+			latest.firmware_major = snapshot->firmware_major;
+			latest.firmware_sub = snapshot->firmware_sub;
+			latest.firmware_modified = snapshot->firmware_modified;
+		}
 	}
 
-	latest.light = 120.0f + (sweep * 8.0f);
-	latest.light_ready = true;
-	latest.led_r = 14;
-	latest.led_g = 66;
-	latest.led_b = 35;
+	if (latest.presence_valid && latest.last_presence_ms &&
+	    latest.uptime_ms - latest.last_presence_ms > 1200U) {
+		latest.presence = false;
+		latest.presence_valid = false;
+		copy_string(latest.presence_source, sizeof(latest.presence_source), "waiting");
+	}
+	if (latest.target_valid && latest.last_target_ms &&
+	    latest.uptime_ms - latest.last_target_ms > 1500U) {
+		clear_target_fields(&latest);
+		copy_string(latest.target_source, sizeof(latest.target_source), "stale");
+	}
+	copy_string(latest.console_fw, sizeof(latest.console_fw), VISLOG_FW_VERSION);
 
 	k_mutex_unlock(&latest_lock);
 }
@@ -117,5 +186,14 @@ void vislog_app_state_copy(struct vislog_sample *out)
 {
 	k_mutex_lock(&latest_lock, K_FOREVER);
 	*out = latest;
+	k_mutex_unlock(&latest_lock);
+}
+
+void vislog_app_state_set_led_rgb(uint8_t r, uint8_t g, uint8_t b)
+{
+	k_mutex_lock(&latest_lock, K_FOREVER);
+	latest.led_r = r;
+	latest.led_g = g;
+	latest.led_b = b;
 	k_mutex_unlock(&latest_lock);
 }

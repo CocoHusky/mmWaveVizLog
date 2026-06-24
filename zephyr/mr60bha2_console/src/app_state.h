@@ -7,6 +7,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "../drivers/mr60bha2/mr60bha2.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define VISLOG_MAX_TARGETS 3
 #define VISLOG_SOURCE_LEN 16
 #define VISLOG_FW_LEN 20
@@ -56,11 +62,19 @@ struct vislog_sample {
 	uint8_t led_b;
 	uint32_t frame;
 	uint32_t last_radar_ms;
+	uint32_t last_presence_ms;
+	uint32_t last_target_ms;
+	uint32_t last_firmware_ms;
 	uint32_t uptime_ms;
 };
 
 void vislog_app_state_init(void);
-void vislog_app_state_update_simulated(void);
+void vislog_app_state_apply_radar_snapshot(const struct mr60bha2_snapshot *snapshot);
 void vislog_app_state_copy(struct vislog_sample *out);
+void vislog_app_state_set_led_rgb(uint8_t r, uint8_t g, uint8_t b);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

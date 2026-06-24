@@ -1,30 +1,51 @@
 /* SPDX-License-Identifier: MIT */
 
 #include <zephyr/kernel.h>
+#include <zephyr/drivers/uart.h>
 #include <zephyr/sys/printk.h>
 
 #include "app_state.h"
+#include "led_control.h"
+#include "ota_control.h"
 #include "json_stream.h"
+#include "net_services.h"
 #include "mr60bha2.h"
 
-#define SAMPLE_PERIOD_MS 100
+#define UART_POLL_SLEEP_MS 5
 #define SERIAL_PERIOD_MS 1000
-#define SAMPLE_THREAD_STACK_SIZE 2048
+#define RADAR_THREAD_STACK_SIZE 2048
 #define SERIAL_THREAD_STACK_SIZE 4096
-#define SAMPLE_THREAD_PRIORITY 5
+#define RADAR_THREAD_PRIORITY 5
 #define SERIAL_THREAD_PRIORITY 7
 
 static struct mr60bha2_device radar;
+static const struct device *radar_uart;
 
-static void sample_thread(void *unused_a, void *unused_b, void *unused_c)
+static void radar_thread(void *unused_a, void *unused_b, void *unused_c)
 {
 	ARG_UNUSED(unused_a);
 	ARG_UNUSED(unused_b);
 	ARG_UNUSED(unused_c);
 
 	while (true) {
-		vislog_app_state_update_simulated();
-		k_sleep(K_MSEC(SAMPLE_PERIOD_MS));
+		uint8_t byte;
+
+		while (uart_poll_in(radar_uart, &byte) == 0) {
+			const enum mr60bha2_parse_result result = mr60bha2_process_byte(&radar, byte);
+
+			if (result == MR60BHA2_PARSE_FRAME_READY) {
+				struct mr60bha2_snapshot snapshot;
+				struct vislog_sample sample;
+
+				mr60bha2_snapshot_take(&radar, &snapshot);
+				vislog_app_state_apply_radar_snapshot(&snapshot);
+				vislog_app_state_copy(&sample);
+				vislog_led_update_from_sample(&sample);
+				vislog_ota_confirm_running_image();
+			}
+		}
+
+		k_sleep(K_MSEC(UART_POLL_SLEEP_MS));
 	}
 }
 
@@ -43,24 +64,34 @@ static void serial_thread(void *unused_a, void *unused_b, void *unused_c)
 	}
 }
 
-K_THREAD_STACK_DEFINE(sample_thread_stack, SAMPLE_THREAD_STACK_SIZE);
+K_THREAD_STACK_DEFINE(radar_thread_stack, RADAR_THREAD_STACK_SIZE);
 K_THREAD_STACK_DEFINE(serial_thread_stack, SERIAL_THREAD_STACK_SIZE);
 
-static struct k_thread sample_thread_data;
+static struct k_thread radar_thread_data;
 static struct k_thread serial_thread_data;
 
 int main(void)
 {
 	vislog_app_state_init();
+	vislog_led_init();
+	vislog_ota_init();
 	mr60bha2_init(&radar);
+	radar_uart = DEVICE_DT_GET(DT_NODELABEL(uart0));
+
+	if (!device_is_ready(radar_uart)) {
+		printk("{\"type\":\"error\",\"message\":\"radar uart not ready\"}\n");
+		return 0;
+	}
 
 	printk("{\"type\":\"boot\",\"app\":\"mr60bha2_console\",\"runtime\":\"zephyr\"}\n");
 
-	k_thread_create(&sample_thread_data, sample_thread_stack,
-			K_THREAD_STACK_SIZEOF(sample_thread_stack),
-			sample_thread, NULL, NULL, NULL,
-			SAMPLE_THREAD_PRIORITY, 0, K_NO_WAIT);
-	k_thread_name_set(&sample_thread_data, "vislog_sample");
+	vislog_net_services_init();
+
+	k_thread_create(&radar_thread_data, radar_thread_stack,
+			K_THREAD_STACK_SIZEOF(radar_thread_stack),
+			radar_thread, NULL, NULL, NULL,
+			RADAR_THREAD_PRIORITY, 0, K_NO_WAIT);
+	k_thread_name_set(&radar_thread_data, "vislog_radar");
 
 	k_thread_create(&serial_thread_data, serial_thread_stack,
 			K_THREAD_STACK_SIZEOF(serial_thread_stack),

@@ -4,11 +4,9 @@
 
 #include <string.h>
 
-#define MR60BHA2_SOF0 0x53
-#define MR60BHA2_SOF1 0x59
-#define MR60BHA2_EOF0 0x54
-#define MR60BHA2_EOF1 0x43
-#define MR60BHA2_MIN_FRAME_LEN 8
+#define MR60BHA2_SOF 0x01
+#define MR60BHA2_FRAME_HEADER_LEN 8
+#define MR60BHA2_FRAME_CHECKSUM_LEN 1
 
 static void reset_frame(struct mr60bha2_parser *parser)
 {
@@ -30,20 +28,14 @@ enum mr60bha2_parse_result mr60bha2_parser_process_byte(struct mr60bha2_parser *
 	}
 
 	if (!parser->collecting) {
-		if (!parser->saw_sync0) {
-			parser->saw_sync0 = byte == MR60BHA2_SOF0;
-			return MR60BHA2_PARSE_NEED_MORE;
-		}
-
-		if (byte != MR60BHA2_SOF1) {
-			parser->saw_sync0 = byte == MR60BHA2_SOF0;
+		if (byte != MR60BHA2_SOF) {
 			return MR60BHA2_PARSE_NEED_MORE;
 		}
 
 		parser->collecting = true;
+		parser->saw_sync0 = true;
 		parser->frame.len = 0;
-		parser->frame.data[parser->frame.len++] = MR60BHA2_SOF0;
-		parser->frame.data[parser->frame.len++] = MR60BHA2_SOF1;
+		parser->frame.data[parser->frame.len++] = MR60BHA2_SOF;
 		return MR60BHA2_PARSE_NEED_MORE;
 	}
 
@@ -54,12 +46,22 @@ enum mr60bha2_parse_result mr60bha2_parser_process_byte(struct mr60bha2_parser *
 
 	parser->frame.data[parser->frame.len++] = byte;
 
-	if (parser->frame.len >= MR60BHA2_MIN_FRAME_LEN &&
-	    parser->frame.data[parser->frame.len - 2] == MR60BHA2_EOF0 &&
-	    parser->frame.data[parser->frame.len - 1] == MR60BHA2_EOF1) {
-		parser->collecting = false;
-		parser->saw_sync0 = false;
-		return MR60BHA2_PARSE_FRAME_READY;
+	if (parser->frame.len >= MR60BHA2_FRAME_HEADER_LEN) {
+		const size_t data_len = ((size_t)parser->frame.data[3] << 8) |
+					(size_t)parser->frame.data[4];
+		const size_t total_len = MR60BHA2_FRAME_HEADER_LEN + data_len +
+					 MR60BHA2_FRAME_CHECKSUM_LEN;
+
+		if (total_len > sizeof(parser->frame.data)) {
+			reset_frame(parser);
+			return MR60BHA2_PARSE_ERROR;
+		}
+
+		if (parser->frame.len == total_len) {
+			parser->collecting = false;
+			parser->saw_sync0 = false;
+			return MR60BHA2_PARSE_FRAME_READY;
+		}
 	}
 
 	return MR60BHA2_PARSE_NEED_MORE;
@@ -68,7 +70,7 @@ enum mr60bha2_parse_result mr60bha2_parser_process_byte(struct mr60bha2_parser *
 bool mr60bha2_parser_take_frame(struct mr60bha2_parser *parser, struct mr60bha2_frame *out)
 {
 	if (parser == NULL || out == NULL || parser->collecting ||
-	    parser->frame.len < MR60BHA2_MIN_FRAME_LEN) {
+	    parser->frame.len < MR60BHA2_FRAME_HEADER_LEN + MR60BHA2_FRAME_CHECKSUM_LEN) {
 		return false;
 	}
 
