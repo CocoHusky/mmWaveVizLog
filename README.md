@@ -198,7 +198,7 @@ If the upload fails or the board does not come back on Wi-Fi after flashing the 
 
 Connect to the device Wi-Fi:
 
-- SSID: `mmWaveVisLog-MR60BHA2`
+- SSID: `mmWaveVisLog-MR60BHA2-123MACID`
 - Password: `wirelessphysiology`
 - UI: `http://192.168.4.1/`
 - OTA hostname: `mmWaveVisLog-MR60BHA2-OTA`
