@@ -26,10 +26,17 @@ void setup() {
   ambientLightReady = beginAmbientLightSensor();
 
   rgbLedWrite(STATUS_LED_PIN, 0, 0, 0);
+  playBootRainbow();
   updateStatusLed();
 
   WiFi.mode(WIFI_AP);
-  WiFi.softAP(WIFI_AP_SSID, WIFI_AP_PASSWORD);
+  WiFi.setSleep(false);
+  IPAddress apIP(192, 168, 4, 1);
+  IPAddress apGateway(192, 168, 4, 1);
+  IPAddress apSubnet(255, 255, 255, 0);
+  WiFi.softAPConfig(apIP, apGateway, apSubnet);
+  WiFi.softAPsetHostname(WIFI_AP_SSID);
+  bool apStarted = WiFi.softAP(WIFI_AP_SSID, WIFI_AP_PASSWORD);
   setupWebServer();
   setupOtaUpdates();
 
@@ -37,6 +44,8 @@ void setup() {
   Serial.println("MR60BHA2 Sensor VisLog ready");
   Serial.print("WiFi: ");
   Serial.println(WIFI_AP_SSID);
+  Serial.print("WiFi AP: ");
+  Serial.println(apStarted ? "started" : "failed");
   Serial.print("Open: http://");
   Serial.println(WiFi.softAPIP());
   Serial.print("OTA hostname: ");
@@ -48,6 +57,12 @@ void setup() {
 }
 
 void loop() {
+  if (otaInProgress) {
+    ArduinoOTA.handle();
+    delay(1);
+    return;
+  }
+
   pollRadarSensor();
   refreshPresenceState();
   pollAmbientLight();
@@ -55,7 +70,7 @@ void loop() {
   server.handleClient();
   ArduinoOTA.handle();
 
-  if (millis() - lastSerialReportMs >= 1000) {
+  if (SERIAL_JSON_REPORTS && millis() - lastSerialReportMs >= 1000) {
     lastSerialReportMs = millis();
     Serial.println(buildSensorStateJson());
   }

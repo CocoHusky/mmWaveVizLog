@@ -8,5 +8,6 @@ WebServer server(80);
 SensorSnapshot sensorState;
 StatusLedConfig statusLed;
 bool ambientLightReady = false;
+bool otaInProgress = false;
 uint32_t lastAmbientLightReadMs = 0;
 uint32_t lastSerialReportMs = 0;

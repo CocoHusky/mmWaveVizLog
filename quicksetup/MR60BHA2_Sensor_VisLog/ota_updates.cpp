@@ -6,18 +6,28 @@
 #include <ArduinoOTA.h>
 
 void setupOtaUpdates() {
+  ArduinoOTA.setPort(3232);
   ArduinoOTA.setHostname(OTA_HOSTNAME);
   ArduinoOTA.setPassword(OTA_PASSWORD);
+  ArduinoOTA.setRebootOnSuccess(true);
   ArduinoOTA.onStart([]() {
+    otaInProgress = true;
     Serial.println("OTA start");
   });
   ArduinoOTA.onEnd([]() {
+    otaInProgress = false;
     Serial.println("\nOTA complete");
   });
   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-    Serial.printf("OTA progress: %u%%\r", (progress * 100) / total);
+    static uint8_t lastPercent = 255;
+    uint8_t percent = uint8_t((progress * 100) / total);
+    if (percent != lastPercent && percent % 10 == 0) {
+      lastPercent = percent;
+      Serial.printf("OTA progress: %u%%\n", percent);
+    }
   });
   ArduinoOTA.onError([](ota_error_t error) {
+    otaInProgress = false;
     Serial.printf("OTA error[%u]: ", error);
     if (error == OTA_AUTH_ERROR) Serial.println("auth failed");
     else if (error == OTA_BEGIN_ERROR) Serial.println("begin failed");

@@ -14,6 +14,7 @@ static constexpr int I2C_SCL_PIN = 23;
 static constexpr uint8_t AMBIENT_LIGHT_I2C_ADDRESS = 0x23;
 static constexpr float MAX_VALID_RADAR_RANGE_M = 6.0f;
 static constexpr uint8_t MAX_TRACKED_TARGETS = MAX_TARGET_NUM;
+static constexpr bool SERIAL_JSON_REPORTS = false;
 
 static const char *WIFI_AP_SSID = "mmWaveVisLog-MR60BHA2";
 static const char *WIFI_AP_PASSWORD = "wirelessphysiology";

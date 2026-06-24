@@ -59,7 +59,7 @@ struct SensorSnapshot {
 enum class LedMode : uint8_t { Off, Solid, Pulse, Rule };
 
 struct StatusLedConfig {
-  LedMode mode = LedMode::Solid;
+  LedMode mode = LedMode::Rule;
   float brightness = 0.35f;
   uint8_t r = 40;
   uint8_t g = 190;

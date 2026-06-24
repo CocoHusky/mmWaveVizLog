@@ -135,6 +135,8 @@ Install the following before uploading:
 3. Set the serial monitor to `115200 baud`.
 4. Upload the sketch over USB.
 5. Open the serial monitor. You should see startup messages showing the Wi-Fi network, local IP address, OTA hostname, and whether the BH1750 was found.
+6. After upload, wait a few seconds for Wi-Fi and OTA to appear before retrying or assuming the board failed.
+7. Use OTA only after the sketch is already running and the board is reachable on its Wi-Fi AP.
 
 ## Wi-Fi and dashboard
 
@@ -263,7 +265,10 @@ OTA hostname: mmWaveVisLog-MR60BHA2-OTA
 OTA password: wp-ota
 ```
 
+After upload or reset, Wi-Fi and OTA can take a few seconds to appear. If the access point or OTA target is not visible immediately, wait briefly before retrying.
+
 Use OTA only on a trusted local network. The access point password and OTA password are hard-coded in the sketch, so change them before using this outside a controlled test setup.
+If OTA reports `No response from device`, the board is usually not yet on its AP or not reachable at `192.168.4.1`; reconnect over USB, wait for the boot messages, then retry.
 
 ## Data interpretation
 

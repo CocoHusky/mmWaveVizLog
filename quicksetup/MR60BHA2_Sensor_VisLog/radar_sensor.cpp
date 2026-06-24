@@ -16,6 +16,36 @@ static void resetRadarTargets() {
   }
 }
 
+static float normalizeRadarCoordinate(float raw);
+
+static void storeRadarTargets(const PeopleCounting &targets, const char *source) {
+  resetRadarTargets();
+  sensorState.targetSource = source;
+  size_t count = targets.targets.size();
+  if (count > MAX_TRACKED_TARGETS) count = MAX_TRACKED_TARGETS;
+  sensorState.targetCount = uint8_t(count);
+  sensorState.targetValid = sensorState.targetCount > 0;
+  for (uint8_t i = 0; i < sensorState.targetCount; i++) {
+    const TargetN &target = targets.targets[i];
+    RadarTarget &out = sensorState.targets[i];
+    out.x = normalizeRadarCoordinate(target.x_point);
+    out.y = normalizeRadarCoordinate(target.y_point);
+    out.distance = hypotf(out.x, out.y);
+    out.angle = atan2f(out.x, out.y) * 180.0f / PI;
+    out.speed = float(target.dop_index) * RANGE_STEP / 100.0f;
+    out.dopIndex = target.dop_index;
+    out.clusterIndex = target.cluster_index;
+  }
+  if (sensorState.targetValid) {
+    sensorState.targetX = sensorState.targets[0].x;
+    sensorState.targetY = sensorState.targets[0].y;
+    sensorState.targetDistance = sensorState.targets[0].distance;
+    sensorState.targetAngle = sensorState.targets[0].angle;
+    sensorState.targetSpeed = sensorState.targets[0].speed;
+    sensorState.lastDetectionSignalMs = millis();
+  }
+}
+
 static float normalizeRadarRange(float raw) {
   if (!isfinite(raw) || raw <= 0.0f) return NAN;
   float metres = raw > MAX_VALID_RADAR_RANGE_M ? raw / 100.0f : raw;
@@ -102,40 +132,21 @@ void pollRadarSensor() {
     gotTargetInfo = true;
     sensorState.lastTargetMs = millis();
     sensorState.targetInfoValid = true;
-    resetRadarTargets();
-    sensorState.targetSource = "target info";
-    size_t count = targets.targets.size();
-    if (count > MAX_TRACKED_TARGETS) count = MAX_TRACKED_TARGETS;
-    sensorState.targetCount = uint8_t(count);
-    sensorState.targetValid = sensorState.targetCount > 0;
-    for (uint8_t i = 0; i < sensorState.targetCount; i++) {
-      const TargetN &target = targets.targets[i];
-      RadarTarget &out = sensorState.targets[i];
-      out.x = normalizeRadarCoordinate(target.x_point);
-      out.y = normalizeRadarCoordinate(target.y_point);
-      out.distance = hypotf(out.x, out.y);
-      out.angle = atan2f(out.x, out.y) * 180.0f / PI;
-      out.speed = float(target.dop_index) * RANGE_STEP / 100.0f;
-      out.dopIndex = target.dop_index;
-      out.clusterIndex = target.cluster_index;
-    }
-    if (sensorState.targetValid) {
-      sensorState.targetX = sensorState.targets[0].x;
-      sensorState.targetY = sensorState.targets[0].y;
-      sensorState.targetDistance = sensorState.targets[0].distance;
-      sensorState.targetAngle = sensorState.targets[0].angle;
-      sensorState.targetSpeed = sensorState.targets[0].speed;
-    }
+    storeRadarTargets(targets, "target info");
     changed = true;
   }
   if (radar.readPointCloud(targets) == seeed::mmwave::Status::Ok) {
     sensorState.lastTargetMs = millis();
     sensorState.pointCloudValid = true;
-    if (!gotTargetInfo) sensorState.targetSource = "point cloud";
+    if (!gotTargetInfo) {
+      storeRadarTargets(targets, "point cloud");
+    }
     changed = true;
   }
 
   if (refreshRadarFirmwareInfo()) changed = true;
+
+  refreshPresenceState();
 
   if (changed) {
     sensorState.frame++;
