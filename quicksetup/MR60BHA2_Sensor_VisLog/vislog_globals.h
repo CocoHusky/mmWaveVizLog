@@ -14,6 +14,7 @@ extern WebServer server;
 extern SensorSnapshot sensorState;
 extern StatusLedConfig statusLed;
 extern bool ambientLightReady;
+extern bool otaInProgress;
 extern uint32_t lastAmbientLightReadMs;
 extern uint32_t lastSerialReportMs;
 
