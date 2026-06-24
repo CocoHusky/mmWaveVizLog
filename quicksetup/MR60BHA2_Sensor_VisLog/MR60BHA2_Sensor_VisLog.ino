@@ -14,9 +14,17 @@
 #include <Wire.h>
 #include "esp32-hal-rgb-led.h"
 
+static void configureDeviceIdentity() {
+  uint32_t suffix = uint32_t(ESP.getEfuseMac() & 0xffffff);
+  snprintf(deviceName, sizeof(deviceName), "%s-%06lX", DEVICE_NAME_PREFIX, (unsigned long)suffix);
+  snprintf(wifiApSsid, sizeof(wifiApSsid), "%s-%06lX", DEVICE_NAME_PREFIX, (unsigned long)suffix);
+  snprintf(otaHostname, sizeof(otaHostname), "%s-%06lX", OTA_HOSTNAME_PREFIX, (unsigned long)suffix);
+}
+
 void setup() {
   Serial.begin(115200);
   delay(300);
+  configureDeviceIdentity();
 
   radarSerial.begin(115200, SERIAL_8N1, RADAR_RX_PIN, RADAR_TX_PIN);
   radar.begin(&radarSerial);
@@ -35,21 +43,23 @@ void setup() {
   IPAddress apGateway(192, 168, 4, 1);
   IPAddress apSubnet(255, 255, 255, 0);
   WiFi.softAPConfig(apIP, apGateway, apSubnet);
-  WiFi.softAPsetHostname(WIFI_AP_SSID);
-  bool apStarted = WiFi.softAP(WIFI_AP_SSID, WIFI_AP_PASSWORD);
+  WiFi.softAPsetHostname(wifiApSsid);
+  bool apStarted = WiFi.softAP(wifiApSsid, WIFI_AP_PASSWORD);
   setupWebServer();
   setupOtaUpdates();
 
   Serial.println();
   Serial.println("MR60BHA2 Sensor VisLog ready");
+  Serial.print("Device: ");
+  Serial.println(deviceName);
   Serial.print("WiFi: ");
-  Serial.println(WIFI_AP_SSID);
+  Serial.println(wifiApSsid);
   Serial.print("WiFi AP: ");
   Serial.println(apStarted ? "started" : "failed");
   Serial.print("Open: http://");
   Serial.println(WiFi.softAPIP());
   Serial.print("OTA hostname: ");
-  Serial.println(OTA_HOSTNAME);
+  Serial.println(otaHostname);
   Serial.print("OTA password: ");
   Serial.println(OTA_PASSWORD);
   Serial.print("BH1750: ");
@@ -57,8 +67,10 @@ void setup() {
 }
 
 void loop() {
-  if (otaInProgress) {
-    ArduinoOTA.handle();
+  static uint32_t lastStatusLedUpdateMs = 0;
+
+  if (OTA_PAUSES_SENSOR_COLLECTION && otaInProgress) {
+    serviceOtaUpdates();
     delay(1);
     return;
   }
@@ -66,9 +78,13 @@ void loop() {
   pollRadarSensor();
   refreshPresenceState();
   pollAmbientLight();
-  updateStatusLed();
+  uint32_t now = millis();
+  if (now - lastStatusLedUpdateMs >= STATUS_LED_UPDATE_INTERVAL_MS) {
+    lastStatusLedUpdateMs = now;
+    updateStatusLed();
+  }
   server.handleClient();
-  ArduinoOTA.handle();
+  serviceOtaUpdates();
 
   if (SERIAL_JSON_REPORTS && millis() - lastSerialReportMs >= 1000) {
     lastSerialReportMs = millis();

@@ -5,9 +5,24 @@
 
 #include <ArduinoOTA.h>
 
+void serviceOtaUpdates() {
+  static uint32_t lastIdlePollMs = 0;
+
+  if (otaInProgress) {
+    ArduinoOTA.handle();
+    return;
+  }
+
+  uint32_t now = millis();
+  if (now - lastIdlePollMs >= OTA_IDLE_POLL_INTERVAL_MS) {
+    lastIdlePollMs = now;
+    ArduinoOTA.handle();
+  }
+}
+
 void setupOtaUpdates() {
   ArduinoOTA.setPort(3232);
-  ArduinoOTA.setHostname(OTA_HOSTNAME);
+  ArduinoOTA.setHostname(otaHostname);
   ArduinoOTA.setPassword(OTA_PASSWORD);
   ArduinoOTA.setRebootOnSuccess(true);
   ArduinoOTA.onStart([]() {

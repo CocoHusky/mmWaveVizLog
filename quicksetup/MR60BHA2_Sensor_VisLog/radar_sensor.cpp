@@ -88,7 +88,7 @@ bool refreshRadarFirmwareInfo(bool force) {
 }
 
 void pollRadarSensor() {
-  if (!radar.update(20)) return;
+  if (!radar.update(RADAR_UPDATE_TIMEOUT_MS)) return;
   bool changed = false;
 
   float total, breath, heart;

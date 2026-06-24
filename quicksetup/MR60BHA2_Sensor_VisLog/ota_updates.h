@@ -4,5 +4,6 @@
 #define VISLOG_OTA_UPDATES_H
 
 void setupOtaUpdates();
+void serviceOtaUpdates();
 
 #endif

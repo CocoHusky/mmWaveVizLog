@@ -143,10 +143,12 @@ Install the following before uploading:
 After upload, the XIAO creates its own Wi-Fi access point:
 
 ```text
-SSID: mmWaveVisLog-MR60BHA2
+SSID: mmWaveVisLog-MR60BHA2-A1B2C3
 Password: wirelessphysiology
 Dashboard: http://192.168.4.1/
 ```
+
+Each board appends the last 3 bytes of its ESP32-C6 ID to the Wi-Fi name, for example `mmWaveVisLog-MR60BHA2-A1B2C3`. The same generated name is printed at boot in the serial monitor.
 
 Connect your laptop or phone to that Wi-Fi network, then open the dashboard URL in a browser.
 
@@ -261,11 +263,13 @@ Threshold rule example:
 OTA is enabled after the device boots.
 
 ```text
-OTA hostname: mmWaveVisLog-MR60BHA2-OTA
+OTA hostname: mmWaveVisLog-MR60BHA2-OTA-A1B2C3
 OTA password: wp-ota
 ```
 
 After upload or reset, Wi-Fi and OTA can take a few seconds to appear. If the access point or OTA target is not visible immediately, wait briefly before retrying.
+
+For lower data latency, OTA is polled periodically while idle instead of on every sensor loop. Once an upload starts, OTA handling switches to continuous service. For faster uploads, the sketch pauses radar/light/LED polling only while an OTA upload is actively in progress. This is controlled by `OTA_PAUSES_SENSOR_COLLECTION` in `vislog_config.h`. Set it to `false` only if you prefer sensor collection to continue during OTA; uploads will be slower and less reliable.
 
 Use OTA only on a trusted local network. The access point password and OTA password are hard-coded in the sketch, so change them before using this outside a controlled test setup.
 If OTA reports `No response from device`, the board is usually not yet on its AP or not reachable at `192.168.4.1`; reconnect over USB, wait for the boot messages, then retry.
@@ -343,9 +347,9 @@ static constexpr int I2C_SCL_PIN = 23;
 static constexpr uint8_t AMBIENT_LIGHT_I2C_ADDRESS = 0x23;
 static constexpr float MAX_VALID_RADAR_RANGE_M = 6.0f;
 
-static const char *WIFI_AP_SSID = "VisLogMR60BHA2";
+static const char *DEVICE_NAME_PREFIX = "mmWaveVisLog-MR60BHA2";
+static const char *OTA_HOSTNAME_PREFIX = "mmWaveVisLog-MR60BHA2-OTA";
 static const char *WIFI_AP_PASSWORD = "wirelessphysiology";
-static const char *OTA_HOSTNAME = "VisLogMR60BHA2-OTA";
 static const char *OTA_PASSWORD = "wp-ota";
 ```
 
