@@ -199,7 +199,7 @@ Use Zephyr for the maintained firmware path in this repository.
 2. Build the app from the repository root:
 
    ```sh
-   cd /Users/alexburton/Documents/GitHub/mmWaveVizLog
+   cd /Users/username/Documents/GitHub/mmWaveVizLog
    export ZEPHYR_BASE="$PWD/zephyr/workspace/zephyr"
    export ZEPHYR_TOOLCHAIN_VARIANT=zephyr
    west build -b xiao_esp32c6/esp32c6/hpcore zephyr/mr60bha2_console

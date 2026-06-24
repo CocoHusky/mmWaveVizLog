@@ -13,6 +13,7 @@ reference.
 - stream schema-compatible JSON Lines over USB serial
 - expose the local dashboard over Wi-Fi
 - support LED control and threshold rules
+- read ambient light from a BH1750 over I2C
 - support Wi-Fi OTA using signed MCUboot images
 - keep parser tests available for host-side validation
 
@@ -75,7 +76,7 @@ west --version
 Run this from the repository root:
 
 ```sh
-cd /Users/alexburton/Documents/GitHub/mmWaveVizLog
+cd /Users/username/Documents/GitHub/mmWaveVizLog
 mkdir -p zephyr/workspace
 cd zephyr/workspace
 west init
@@ -133,7 +134,7 @@ echo $PATH
 From the Zephyr repository in this workspace, install the SDK once:
 
 ```sh
-cd /Users/alexburton/Documents/GitHub/mmWaveVizLog/zephyr/workspace/zephyr
+cd /Users/username/Documents/GitHub/mmWaveVizLog/zephyr/workspace/zephyr
 west sdk install --version 0.17.4 -t riscv64-zephyr-elf
 ```
 
@@ -148,7 +149,7 @@ export ZEPHYR_TOOLCHAIN_VARIANT=zephyr
 ### 5. Build from inside the workspace
 
 ```sh
-cd /Users/alexburton/Documents/GitHub/mmWaveVizLog/zephyr/workspace
+cd /Users/username/Documents/GitHub/mmWaveVizLog/zephyr/workspace
 export ZEPHYR_TOOLCHAIN_VARIANT=zephyr
 west build -b xiao_esp32c6/esp32c6/hpcore ../mr60bha2_console
 ```
@@ -158,7 +159,7 @@ west build -b xiao_esp32c6/esp32c6/hpcore ../mr60bha2_console
 If you prefer to run commands from the repository root, set `ZEPHYR_BASE` first:
 
 ```sh
-cd /Users/alexburton/Documents/GitHub/mmWaveVizLog
+cd /Users/username/Documents/GitHub/mmWaveVizLog
 export ZEPHYR_BASE="$PWD/zephyr/workspace/zephyr"
 export ZEPHYR_TOOLCHAIN_VARIANT=zephyr
 west build -b xiao_esp32c6/esp32c6/hpcore zephyr/mr60bha2_console
@@ -177,7 +178,7 @@ Use VS Code as the editor and integrated terminal for Zephyr work.
 Open the project root in VS Code:
 
 ```sh
-code /Users/alexburton/Documents/GitHub/mmWaveVizLog
+code /Users/username/Documents/GitHub/mmWaveVizLog
 ```
 
 Recommended extensions:
@@ -189,7 +190,7 @@ Recommended extensions:
 Build in the VS Code terminal:
 
 ```sh
-cd /Users/alexburton/Documents/GitHub/mmWaveVizLog
+cd /Users/username/Documents/GitHub/mmWaveVizLog
 export ZEPHYR_BASE="$PWD/zephyr/workspace/zephyr"
 export ZEPHYR_TOOLCHAIN_VARIANT=zephyr
 west build -b xiao_esp32c6/esp32c6/hpcore zephyr/mr60bha2_console
@@ -233,9 +234,11 @@ west twister -T zephyr/mr60bha2_console/tests
 
 The parser test currently verifies initialization, empty input handling, partial frame handling, and MR60BHA2 frame envelope detection. Real captured radar frames should be added next.
 
+If the BH1750 is present, the `light` and `light_ready` fields should populate after boot; otherwise they remain `null`/`false`.
+
 ## Hardware Bring-Up Notes
 
 - The current board target is `xiao_esp32c6/esp32c6/hpcore`.
-- UART, LED, and I2C wiring are defined in the board overlay.
+- UART, LED, and BH1750 wiring are defined in the board overlay.
 - The serial sample stream and web dashboard use the same JSON schema as the
   other firmware paths in this repository.

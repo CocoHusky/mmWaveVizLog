@@ -189,6 +189,14 @@ void vislog_app_state_copy(struct vislog_sample *out)
 	k_mutex_unlock(&latest_lock);
 }
 
+void vislog_app_state_set_light(float light_lux, bool ready)
+{
+	k_mutex_lock(&latest_lock, K_FOREVER);
+	latest.light = light_lux;
+	latest.light_ready = ready;
+	k_mutex_unlock(&latest_lock);
+}
+
 void vislog_app_state_set_led_rgb(uint8_t r, uint8_t g, uint8_t b)
 {
 	k_mutex_lock(&latest_lock, K_FOREVER);

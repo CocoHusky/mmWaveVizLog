@@ -71,6 +71,7 @@ struct vislog_sample {
 void vislog_app_state_init(void);
 void vislog_app_state_apply_radar_snapshot(const struct mr60bha2_snapshot *snapshot);
 void vislog_app_state_copy(struct vislog_sample *out);
+void vislog_app_state_set_light(float light_lux, bool ready);
 void vislog_app_state_set_led_rgb(uint8_t r, uint8_t g, uint8_t b);
 
 #ifdef __cplusplus

@@ -5,6 +5,7 @@
 #include <zephyr/sys/printk.h>
 
 #include "app_state.h"
+#include "ambient_light.h"
 #include "led_control.h"
 #include "ota_control.h"
 #include "json_stream.h"
@@ -13,9 +14,12 @@
 
 #define UART_POLL_SLEEP_MS 5
 #define SERIAL_PERIOD_MS 1000
+#define AMBIENT_LIGHT_POLL_MS 50
 #define RADAR_THREAD_STACK_SIZE 2048
 #define SERIAL_THREAD_STACK_SIZE 4096
+#define AMBIENT_THREAD_STACK_SIZE 1024
 #define RADAR_THREAD_PRIORITY 5
+#define AMBIENT_THREAD_PRIORITY 6
 #define SERIAL_THREAD_PRIORITY 7
 
 static struct mr60bha2_device radar;
@@ -64,17 +68,32 @@ static void serial_thread(void *unused_a, void *unused_b, void *unused_c)
 	}
 }
 
+static void ambient_thread(void *unused_a, void *unused_b, void *unused_c)
+{
+	ARG_UNUSED(unused_a);
+	ARG_UNUSED(unused_b);
+	ARG_UNUSED(unused_c);
+
+	while (true) {
+		vislog_ambient_light_poll();
+		k_sleep(K_MSEC(AMBIENT_LIGHT_POLL_MS));
+	}
+}
+
 K_THREAD_STACK_DEFINE(radar_thread_stack, RADAR_THREAD_STACK_SIZE);
 K_THREAD_STACK_DEFINE(serial_thread_stack, SERIAL_THREAD_STACK_SIZE);
+K_THREAD_STACK_DEFINE(ambient_thread_stack, AMBIENT_THREAD_STACK_SIZE);
 
 static struct k_thread radar_thread_data;
 static struct k_thread serial_thread_data;
+static struct k_thread ambient_thread_data;
 
 int main(void)
 {
 	vislog_app_state_init();
 	vislog_led_init();
 	vislog_ota_init();
+	vislog_ambient_light_init();
 	mr60bha2_init(&radar);
 	radar_uart = DEVICE_DT_GET(DT_NODELABEL(uart0));
 
@@ -84,6 +103,12 @@ int main(void)
 	}
 
 	printk("{\"type\":\"boot\",\"app\":\"mr60bha2_console\",\"runtime\":\"zephyr\"}\n");
+	{
+		struct vislog_sample sample;
+
+		vislog_app_state_copy(&sample);
+		printk("BH1750: %s\n", sample.light_ready ? "ready" : "not found");
+	}
 
 	vislog_net_services_init();
 
@@ -98,6 +123,12 @@ int main(void)
 			serial_thread, NULL, NULL, NULL,
 			SERIAL_THREAD_PRIORITY, 0, K_NO_WAIT);
 	k_thread_name_set(&serial_thread_data, "vislog_serial");
+
+	k_thread_create(&ambient_thread_data, ambient_thread_stack,
+			K_THREAD_STACK_SIZEOF(ambient_thread_stack),
+			ambient_thread, NULL, NULL, NULL,
+			AMBIENT_THREAD_PRIORITY, 0, K_NO_WAIT);
+	k_thread_name_set(&ambient_thread_data, "vislog_light");
 
 	while (true) {
 		k_sleep(K_SECONDS(60));

@@ -15,6 +15,7 @@ target_include_directories(app PRIVATE
 target_sources(app PRIVATE
   src/main.c
   src/app_state.c
+  src/ambient_light.c
   src/led_control.c
   src/ota_control.c
   src/json_stream.c
