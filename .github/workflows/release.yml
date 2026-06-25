@@ -1,21 +1,23 @@
-name: Zephyr CI
+name: Release
 
 on:
   push:
-  pull_request:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
 
 env:
   APP_PATH: zephyr/mr60bha2_console
-  BOARD: xiao_esp32c6/esp32c6/hpcore
-  FIRMWARE_BUILD_DIR: build/firmware
   TEST_PATH: zephyr/mr60bha2_console/tests/mr60bha2_parser
   ZEPHYR_REVISION: main
   ZEPHYR_WORKSPACE: zephyr/workspace
   ZEPHYR_SDK_VERSION: 0.17.0
 
 jobs:
-  zephyr:
-    name: Parser, Twister, and schema validation
+  release:
+    name: Build and publish release
     runs-on: ubuntu-latest
 
     steps:
@@ -40,12 +42,12 @@ jobs:
             make \
             ninja-build \
             wget \
-            xz-utils
+            xz-utils \
+            zip
 
           python3 -m pip install --user --upgrade pip
           python3 -m pip install --user west jsonschema
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          echo "ZEPHYR_SDK_INSTALL_DIR=$RUNNER_TEMP/zephyr-sdk" >> "$GITHUB_ENV"
 
       - name: Initialize Zephyr workspace
         run: |
@@ -72,14 +74,7 @@ jobs:
 
           echo "ZEPHYR_SDK_INSTALL_DIR=$GITHUB_WORKSPACE/zephyr-sdk-${ZEPHYR_SDK_VERSION}" >> "$GITHUB_ENV"
 
-      - name: Install Zephyr SDK host tools
-        run: |
-          west sdk install \
-            -T \
-            -d "$ZEPHYR_SDK_INSTALL_DIR"
-        working-directory: ${{ env.ZEPHYR_WORKSPACE }}
-
-      - name: Build parser tests
+      - name: Build native_sim parser test
         working-directory: ${{ env.ZEPHYR_WORKSPACE }}
         run: |
           west build \
@@ -88,18 +83,9 @@ jobs:
             "$GITHUB_WORKSPACE/$TEST_PATH" \
             -d "$GITHUB_WORKSPACE/build/parser-tests"
 
-      - name: Run parser tests
+      - name: Run native_sim parser test
         run: |
           "$GITHUB_WORKSPACE/build/parser-tests/zephyr/zephyr.exe"
-
-      - name: Run Twister
-        working-directory: ${{ env.ZEPHYR_WORKSPACE }}
-        run: |
-          west twister \
-            -T "$GITHUB_WORKSPACE/$APP_PATH/tests" \
-            --platform native_sim \
-            --inline-logs \
-            --outdir "$GITHUB_WORKSPACE/build/twister"
 
       - name: Validate JSON schema examples
         run: |
@@ -137,73 +123,51 @@ jobs:
           print(f"Validated {len(example_paths)} JSON example(s)")
           PY
 
-  firmware:
-    name: Build XIAO ESP32-C6 firmware
-    runs-on: ubuntu-latest
-    env:
-      ZEPHYR_TOOLCHAIN_VARIANT: zephyr
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Install host dependencies
+      - name: Package release artifacts
         run: |
-          sudo apt-get update
-          sudo apt-get install --no-install-recommends -y \
-            ccache \
-            cmake \
-            device-tree-compiler \
-            file \
-            g++ \
-            gcc \
-            gperf \
-            libmagic1 \
-            libsdl2-dev \
-            make \
-            ninja-build \
-            wget \
-            xz-utils
-          python3 -m pip install --user --upgrade pip
-          python3 -m pip install --user west
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          echo "ZEPHYR_SDK_INSTALL_DIR=$RUNNER_TEMP/zephyr-sdk" >> "$GITHUB_ENV"
+          mkdir -p release
 
-      - name: Initialize Zephyr workspace
-        run: |
-          west init "$ZEPHYR_WORKSPACE" \
-            -m https://github.com/zephyrproject-rtos/zephyr \
-            --mr "$ZEPHYR_REVISION"
+          cp "$GITHUB_WORKSPACE/build/parser-tests/zephyr/zephyr.exe" \
+            release/mmwavevizlog-parser-native_sim-${GITHUB_REF_NAME}.exe
 
-      - name: Install Zephyr Python dependencies
-        run: |
-          west update
-          west zephyr-export
-          python3 -m pip install --user -r zephyr/scripts/requirements.txt
-        working-directory: ${{ env.ZEPHYR_WORKSPACE }}
+          cp "$GITHUB_WORKSPACE/build/parser-tests/zephyr/zephyr.elf" \
+            release/mmwavevizlog-parser-native_sim-${GITHUB_REF_NAME}.elf
 
-      - name: Install Zephyr SDK
-        run: |
-          west sdk install \
-            -t riscv64-zephyr-elf \
-            -d "$ZEPHYR_SDK_INSTALL_DIR"
-        working-directory: ${{ env.ZEPHYR_WORKSPACE }}
+          cp "$GITHUB_WORKSPACE/build/parser-tests/zephyr/zephyr.map" \
+            release/mmwavevizlog-parser-native_sim-${GITHUB_REF_NAME}.map
 
-      - name: Build firmware
-        run: |
-          west build \
-            -b "$BOARD" \
-            "$GITHUB_WORKSPACE/$APP_PATH" \
-            -d "$GITHUB_WORKSPACE/$FIRMWARE_BUILD_DIR"
-        working-directory: ${{ env.ZEPHYR_WORKSPACE }}
+          cp protocol/sample.schema.json \
+            release/mmwavevizlog-sample-schema-${GITHUB_REF_NAME}.json
 
-      - name: Verify signed firmware artifact
-        run: |
-          test -f "$FIRMWARE_BUILD_DIR/zephyr/zephyr.signed.bin"
+          zip -r \
+            release/mmwavevizlog-protocol-examples-${GITHUB_REF_NAME}.zip \
+            protocol/examples
 
-      - name: Upload signed firmware
+          cat > release/RELEASE_NOTES.txt <<EOF
+          mmWaveVizLog ${GITHUB_REF_NAME}
+
+          Included artifacts:
+          - Native simulator parser executable
+          - Zephyr ELF
+          - Zephyr map file
+          - Protocol JSON schema
+          - Protocol JSON examples
+
+          Built from commit:
+          ${GITHUB_SHA}
+          EOF
+
+          ls -lah release
+
+      - name: Upload workflow artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: xiao-esp32c6-zephyr-signed-bin
-          path: ${{ env.FIRMWARE_BUILD_DIR }}/zephyr/zephyr.signed.bin
-          if-no-files-found: error
+          name: mmwavevizlog-release-${{ github.ref_name }}
+          path: release/*
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: mmWaveVizLog ${{ github.ref_name }}
+          body_path: release/RELEASE_NOTES.txt
+          files: release/*
