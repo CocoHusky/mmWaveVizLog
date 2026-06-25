@@ -12,7 +12,7 @@ permissions:
 env:
   APP_PATH: zephyr/mr60bha2_console
   TEST_PATH: zephyr/mr60bha2_console/tests/mr60bha2_parser
-  ZEPHYR_REVISION: v4.4.0
+  ZEPHYR_REVISION: main
   ZEPHYR_WORKSPACE: zephyr/workspace
 
 jobs:
