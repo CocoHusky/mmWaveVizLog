@@ -5,22 +5,29 @@ on:
     tags:
       - "v*.*.*"
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to publish, for example v0.1.0"
+        required: true
+        default: "v0.1.0"
 
 permissions:
   contents: write
 
 env:
   APP_PATH: zephyr/mr60bha2_console
+  BOARD: xiao_esp32c6/esp32c6/hpcore
+  FIRMWARE_BUILD_DIR: build/firmware
+  RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
   TEST_PATH: zephyr/mr60bha2_console/tests/mr60bha2_parser
   ZEPHYR_REVISION: main
   ZEPHYR_WORKSPACE: zephyr/workspace
+  ZEPHYR_SDK_VERSION: "1.0.1"
 
 jobs:
   release:
     name: Build and publish release
     runs-on: ubuntu-latest
-    env:
-      ZEPHYR_TOOLCHAIN_VARIANT: host
 
     steps:
       - name: Check out repository
@@ -48,7 +55,7 @@ jobs:
             zip
 
           python3 -m pip install --user --upgrade pip
-          python3 -m pip install --user west jsonschema
+          python3 -m pip install --user west jsonschema esptool
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Initialize Zephyr workspace
@@ -66,6 +73,8 @@ jobs:
 
       - name: Build native_sim parser test
         working-directory: ${{ env.ZEPHYR_WORKSPACE }}
+        env:
+          ZEPHYR_TOOLCHAIN_VARIANT: host
         run: |
           west build \
             -p always \
@@ -113,33 +122,79 @@ jobs:
           print(f"Validated {len(example_paths)} JSON example(s)")
           PY
 
+      - name: Fetch Espressif binary blobs
+        run: |
+          west blobs fetch hal_espressif
+        working-directory: ${{ env.ZEPHYR_WORKSPACE }}
+
+      - name: Install Zephyr SDK
+        run: |
+          west sdk install \
+            --version "$ZEPHYR_SDK_VERSION" \
+            -t riscv64-zephyr-elf \
+            -d "$RUNNER_TEMP/zephyr-sdk"
+
+          SDK_CONFIG="$(find "$RUNNER_TEMP/zephyr-sdk" -type f \( \
+            -name 'Zephyr-sdkConfig.cmake' -o \
+            -name 'Zephyr-sdk-config.cmake' -o \
+            -name 'zephyr-sdk-config.cmake' \
+          \) -print -quit)"
+
+          if [ -z "$SDK_CONFIG" ]; then
+            echo "Could not locate Zephyr SDK CMake package under $RUNNER_TEMP/zephyr-sdk" >&2
+            exit 1
+          fi
+
+          SDK_ROOT="$(dirname "$(dirname "$(dirname "$SDK_CONFIG")")")"
+          echo "ZEPHYR_SDK_INSTALL_DIR=$SDK_ROOT" >> "$GITHUB_ENV"
+          echo "Zephyr SDK installed at $SDK_ROOT"
+        working-directory: ${{ env.ZEPHYR_WORKSPACE }}
+
+      - name: Build XIAO ESP32-C6 firmware
+        working-directory: ${{ env.ZEPHYR_WORKSPACE }}
+        env:
+          ZEPHYR_TOOLCHAIN_VARIANT: zephyr
+        run: |
+          west build \
+            -p always \
+            -b "$BOARD" \
+            "$GITHUB_WORKSPACE/$APP_PATH" \
+            -d "$GITHUB_WORKSPACE/$FIRMWARE_BUILD_DIR"
+
+      - name: Verify signed firmware artifact
+        run: |
+          test -f "$FIRMWARE_BUILD_DIR/zephyr/zephyr.signed.bin"
+
       - name: Package release artifacts
         run: |
           mkdir -p release
 
+          cp "$FIRMWARE_BUILD_DIR/zephyr/zephyr.signed.bin" \
+            "release/mmwavevizlog-xiao-esp32c6-${RELEASE_TAG}.signed.bin"
+
+          cp "$FIRMWARE_BUILD_DIR/zephyr/zephyr.elf" \
+            "release/mmwavevizlog-xiao-esp32c6-${RELEASE_TAG}.elf"
+
+          cp "$FIRMWARE_BUILD_DIR/zephyr/zephyr.map" \
+            "release/mmwavevizlog-xiao-esp32c6-${RELEASE_TAG}.map"
+
           cp "$GITHUB_WORKSPACE/build/parser-tests/zephyr/zephyr.exe" \
-            release/mmwavevizlog-parser-native_sim-${GITHUB_REF_NAME}.exe
-
-          cp "$GITHUB_WORKSPACE/build/parser-tests/zephyr/zephyr.elf" \
-            release/mmwavevizlog-parser-native_sim-${GITHUB_REF_NAME}.elf
-
-          cp "$GITHUB_WORKSPACE/build/parser-tests/zephyr/zephyr.map" \
-            release/mmwavevizlog-parser-native_sim-${GITHUB_REF_NAME}.map
+            "release/mmwavevizlog-parser-native_sim-${RELEASE_TAG}.exe"
 
           cp protocol/sample.schema.json \
-            release/mmwavevizlog-sample-schema-${GITHUB_REF_NAME}.json
+            "release/mmwavevizlog-sample-schema-${RELEASE_TAG}.json"
 
           zip -r \
-            release/mmwavevizlog-protocol-examples-${GITHUB_REF_NAME}.zip \
+            "release/mmwavevizlog-protocol-examples-${RELEASE_TAG}.zip" \
             protocol/examples
 
           cat > release/RELEASE_NOTES.txt <<EOF
-          mmWaveVizLog ${GITHUB_REF_NAME}
+          mmWaveVizLog ${RELEASE_TAG}
 
           Included artifacts:
+          - XIAO ESP32-C6 signed Zephyr firmware binary
+          - XIAO ESP32-C6 Zephyr ELF and map files
           - Native simulator parser executable
-          - Zephyr ELF
-          - Zephyr map file
           - Protocol JSON schema
           - Protocol JSON examples
 
@@ -152,12 +207,14 @@ jobs:
       - name: Upload workflow artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: mmwavevizlog-release-${{ github.ref_name }}
+          name: mmwavevizlog-release-${{ env.RELEASE_TAG }}
           path: release/*
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          name: mmWaveVizLog ${{ github.ref_name }}
+          tag_name: ${{ env.RELEASE_TAG }}
+          target_commitish: ${{ github.sha }}
+          name: mmWaveVizLog ${{ env.RELEASE_TAG }}
           body_path: release/RELEASE_NOTES.txt
           files: release/*
