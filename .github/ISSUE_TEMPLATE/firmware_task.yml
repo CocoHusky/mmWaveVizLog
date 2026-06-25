@@ -1,0 +1,49 @@
+name: Firmware task
+description: Track a firmware, parser, dashboard, API, or release-engineering task.
+title: "firmware: "
+labels:
+  - firmware
+body:
+  - type: dropdown
+    id: path
+    attributes:
+      label: Firmware path
+      options:
+        - Zephyr runtime
+        - Arduino quickstart
+        - Shared protocol/schema
+        - CI/release
+    validations:
+      required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What capability or fix should this task deliver?
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: What must be true for this task to be complete?
+      placeholder: |
+        -
+        -
+        -
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation method
+      description: Parser test, firmware build, schema validation, dashboard/API check, release artifact check, or manual hardware check.
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Related requirements, files, or follow-up work.
+    validations:
+      required: false
