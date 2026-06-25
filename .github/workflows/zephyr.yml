@@ -169,6 +169,7 @@ jobs:
           west update
           west zephyr-export
           python3 -m pip install --user -r zephyr/scripts/requirements.txt
+          west packages pip --install
         working-directory: ${{ env.ZEPHYR_WORKSPACE }}
 
       - name: Install Zephyr SDK

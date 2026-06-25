@@ -15,5 +15,6 @@ target_compile_definitions(app PRIVATE
 
 target_sources(app PRIVATE
   src/main.c
+  ../../drivers/mr60bha2/mr60bha2.c
   ../../drivers/mr60bha2/mr60bha2_parser.c
 )
