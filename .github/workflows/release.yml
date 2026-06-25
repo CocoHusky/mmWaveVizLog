@@ -12,7 +12,7 @@ permissions:
 env:
   APP_PATH: zephyr/mr60bha2_console
   TEST_PATH: zephyr/mr60bha2_console/tests/mr60bha2_parser
-  ZEPHYR_REVISION: main
+  ZEPHYR_REVISION: v4.4.0
   ZEPHYR_WORKSPACE: zephyr/workspace
 
 jobs:
@@ -20,8 +20,6 @@ jobs:
     name: Build and publish release
     runs-on: ubuntu-latest
     env:
-      # The release currently packages the native_sim parser artifact, so the
-      # host compiler is enough and avoids Zephyr SDK package-version failures.
       ZEPHYR_TOOLCHAIN_VARIANT: host
 
     steps:
