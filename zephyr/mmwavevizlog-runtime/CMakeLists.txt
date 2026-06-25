@@ -3,7 +3,7 @@
 cmake_minimum_required(VERSION 3.20.0)
 
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
-project(mr60bha2_console_zephyr VERSION 0.1.0 LANGUAGES C CXX)
+project(mmwavevizlog_runtime VERSION 0.1.0 LANGUAGES C CXX)
 
 set_source_files_properties(src/net_services.c PROPERTIES LANGUAGE CXX)
 

@@ -15,11 +15,11 @@ permissions:
   contents: write
 
 env:
-  APP_PATH: zephyr/mr60bha2_console
+  APP_PATH: zephyr/mmwavevizlog-runtime
   BOARD: xiao_esp32c6/esp32c6/hpcore
   FIRMWARE_BUILD_DIR: build/firmware
   RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
-  TEST_PATH: zephyr/mr60bha2_console/tests/mr60bha2_parser
+  TEST_PATH: zephyr/mmwavevizlog-runtime/tests/mr60bha2_parser
   ZEPHYR_REVISION: main
   ZEPHYR_WORKSPACE: zephyr/workspace
   ZEPHYR_SDK_VERSION: "1.0.1"

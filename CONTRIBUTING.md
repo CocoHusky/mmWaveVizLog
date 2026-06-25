@@ -2,8 +2,8 @@
 
 Thanks for improving mmWaveVizLog. This repository has two firmware paths:
 
-- `zephyr/mr60bha2_console/` is the maintained product/runtime firmware path.
-- `arduino/MR60BHA2_Sensor_VisLog/` is the quick-start bring-up and hardware-reference path.
+- `zephyr/mmwavevizlog-runtime/` is the maintained product/runtime firmware path.
+- `arduino/mmwavevizlog-quickstart/` is the quick-start bring-up and hardware-reference path.
 
 ## Pull Request Expectations
 
@@ -21,8 +21,7 @@ Required CI checks should include:
 - protocol JSON schema validation
 - XIAO ESP32-C6 Zephyr firmware build
 
-Twister coverage is useful, but it is currently treated as optional/non-blocking
-until its harness path is hardened.
+Twister coverage is useful, but it is advisory until its harness path is hardened.
 
 ## Versioning
 
@@ -35,7 +34,7 @@ Release tags use `vA.B.C`:
 For a release, keep these aligned when practical:
 
 - Git tag, for example `v0.1.0`
-- `zephyr/mr60bha2_console/VERSION`
+- `zephyr/mmwavevizlog-runtime/VERSION`
 - Arduino reference firmware version in `vislog_config.h`
 - protocol example `console_fw` fields
 

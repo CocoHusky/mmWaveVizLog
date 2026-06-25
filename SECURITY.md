@@ -21,13 +21,13 @@ passwords so a new device can boot quickly. For any shared, field, demo, or
 longer-term device, copy:
 
 ```text
-arduino/MR60BHA2_Sensor_VisLog/vislog_private_config.example.h
+arduino/mmwavevizlog-quickstart/vislog_private_config.example.h
 ```
 
 to:
 
 ```text
-arduino/MR60BHA2_Sensor_VisLog/vislog_private_config.h
+arduino/mmwavevizlog-quickstart/vislog_private_config.h
 ```
 
 Then change the Wi-Fi and OTA passwords. The private override file is ignored by
