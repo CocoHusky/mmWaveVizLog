@@ -38,6 +38,6 @@ static const char *DEVICE_NAME_PREFIX = "mmWaveVisLog-MR60BHA2";
 static const char *OTA_HOSTNAME_PREFIX = "mmWaveVisLog-MR60BHA2-OTA";
 static const char *WIFI_AP_PASSWORD = VISLOG_WIFI_AP_PASSWORD;
 static const char *OTA_PASSWORD = VISLOG_OTA_PASSWORD;
-static const char *VISLOG_FW_VERSION = "0.1.0";
+static const char *VISLOG_FW_VERSION = "0.2.0";
 
 #endif

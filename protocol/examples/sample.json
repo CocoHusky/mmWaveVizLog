@@ -22,7 +22,7 @@
   "targets": [],
   "light": null,
   "light_ready": false,
-  "console_fw": "mmWaveVizLog 0.1.0",
+  "console_fw": "mmWaveVizLog 0.2.0",
   "firmware_valid": false,
   "firmware_raw": 0,
   "firmware_project": 0,

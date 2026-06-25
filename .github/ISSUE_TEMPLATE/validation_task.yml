@@ -1,0 +1,39 @@
+name: Validation task
+description: Define a software validation activity.
+title: "validation: "
+labels: ["validation"]
+body:
+  - type: input
+    id: validation-id
+    attributes:
+      label: Validation ID
+      placeholder: VAL-001
+    validations:
+      required: true
+  - type: input
+    id: requirement-id
+    attributes:
+      label: Requirement ID
+      placeholder: REQ-SW-001
+    validations:
+      required: false
+  - type: textarea
+    id: setup
+    attributes:
+      label: Setup
+      description: Hardware, firmware, or host setup required.
+    validations:
+      required: true
+  - type: textarea
+    id: method
+    attributes:
+      label: Method
+      description: How will the validation be run?
+    validations:
+      required: true
+  - type: textarea
+    id: pass-fail
+    attributes:
+      label: Pass/fail criteria
+    validations:
+      required: true
