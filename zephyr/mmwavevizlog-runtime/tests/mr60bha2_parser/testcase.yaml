@@ -1,0 +1,9 @@
+tests:
+  drivers.mr60bha2.parser:
+    tags:
+      - drivers
+      - mr60bha2
+      - parser
+    platform_allow:
+      - native_sim
+    harness: ztest
