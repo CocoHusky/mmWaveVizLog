@@ -1,0 +1,58 @@
+name: Bug report
+description: Report a firmware, dashboard, protocol, or CI issue.
+title: "bug: "
+labels:
+  - bug
+body:
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed behavior
+      description: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should have happened?
+    validations:
+      required: true
+  - type: dropdown
+    id: path
+    attributes:
+      label: Area
+      options:
+        - Arduino quickstart
+        - Zephyr runtime
+        - Protocol/schema
+        - Dashboard/API
+        - CI/release
+        - Documentation
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction steps
+      description: Include commands, hardware state, or dashboard/API steps.
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: Paste serial logs, CI snippets, screenshots, or API responses if available.
+    validations:
+      required: false
+  - type: checkboxes
+    id: private-data
+    attributes:
+      label: Private data check
+      options:
+        - label: I removed private credentials, private captures, and identifying data.
+          required: true
