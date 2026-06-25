@@ -6,6 +6,18 @@
 #include <Arduino.h>
 #include "Seeed_Arduino_mmWave.h"
 
+#if __has_include("vislog_private_config.h")
+#include "vislog_private_config.h"
+#endif
+
+#ifndef VISLOG_WIFI_AP_PASSWORD
+#define VISLOG_WIFI_AP_PASSWORD "wirelessphysiology"
+#endif
+
+#ifndef VISLOG_OTA_PASSWORD
+#define VISLOG_OTA_PASSWORD "wp-ota"
+#endif
+
 static constexpr int RADAR_RX_PIN = 17;
 static constexpr int RADAR_TX_PIN = 16;
 static constexpr int STATUS_LED_PIN = 1;
@@ -24,8 +36,8 @@ static constexpr bool OTA_PAUSES_SENSOR_COLLECTION = true;
 
 static const char *DEVICE_NAME_PREFIX = "mmWaveVisLog-MR60BHA2";
 static const char *OTA_HOSTNAME_PREFIX = "mmWaveVisLog-MR60BHA2-OTA";
-static const char *WIFI_AP_PASSWORD = "wirelessphysiology";
-static const char *OTA_PASSWORD = "wp-ota";
-static const char *VISLOG_FW_VERSION = "2.1.4";
+static const char *WIFI_AP_PASSWORD = VISLOG_WIFI_AP_PASSWORD;
+static const char *OTA_PASSWORD = VISLOG_OTA_PASSWORD;
+static const char *VISLOG_FW_VERSION = "0.1.0";
 
 #endif

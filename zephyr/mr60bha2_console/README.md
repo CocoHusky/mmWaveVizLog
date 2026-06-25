@@ -1,9 +1,13 @@
 # MR60BHA2 Zephyr Console
 
 Zephyr firmware for the XIAO ESP32-C6 and Seeed MR60BHA2 sensor stack. This
-path is the maintained runtime in this repository and keeps the sample schema,
-dashboard behavior, LED control, and OTA flow aligned with the Arduino bring-up
-reference.
+path is the maintained product/runtime firmware in this repository. It keeps the
+sample schema, dashboard behavior, LED control, OTA flow, parser tests, and
+release artifacts aligned around the Zephyr build.
+
+The Arduino path remains available as the quick-start bring-up reference for
+users who want to verify the hardware before installing the full Zephyr
+toolchain.
 
 ## Runtime Goals
 
@@ -45,6 +49,13 @@ The Zephyr target preserves the current Arduino wiring contract:
 | BH1750 I2C SDA | `22` |
 | BH1750 I2C SCL | `23` |
 | BH1750 I2C address | `0x23` |
+
+## Versioning
+
+The Zephyr app version is stored in `VERSION`. Release tags use `vA.B.C`, where
+`A` is the major version, `B` is the minor version, and `C` is the patch version.
+For the current prototype/runtime bring-up phase, the first aligned release is
+`v0.1.0`.
 
 ## Local Zephyr Workspace
 
@@ -253,7 +264,7 @@ screen /dev/cu.usbmodem14201 115200
 Expected output is one JSON object per line:
 
 ```json
-{"type":"sample","heart_rate":null,"breath_rate":null,"distance":null,"raw_distance":null,"total_phase":null,"breath_phase":null,"heart_phase":null,"presence":false,"presence_valid":false,"presence_source":"waiting","target_valid":false,"target_source":"waiting","people_count":0,"target_count":0,"target_x":null,"target_y":null,"target_distance":null,"target_angle":null,"target_speed":null,"targets":[],"light":null,"light_ready":false,"console_fw":"Zephyr 2.2.1","firmware_valid":false,"firmware_raw":0,"firmware_project":0,"firmware_major":0,"firmware_sub":0,"firmware_modified":0,"led_r":0,"led_g":0,"led_b":0,"frame":0,"last_radar_ms":0,"uptime_ms":0}
+{"type":"sample","heart_rate":null,"breath_rate":null,"distance":null,"raw_distance":null,"total_phase":null,"breath_phase":null,"heart_phase":null,"presence":false,"presence_valid":false,"presence_source":"waiting","target_valid":false,"target_source":"waiting","people_count":0,"target_count":0,"target_x":null,"target_y":null,"target_distance":null,"target_angle":null,"target_speed":null,"targets":[],"light":null,"light_ready":false,"console_fw":"mmWaveVizLog 0.1.0","firmware_valid":false,"firmware_raw":0,"firmware_project":0,"firmware_major":0,"firmware_sub":0,"firmware_modified":0,"led_r":0,"led_g":0,"led_b":0,"frame":0,"last_radar_ms":0,"uptime_ms":0}
 ```
 
 Validation checklist:
@@ -267,14 +278,34 @@ Validation checklist:
 
 ## Parser Tests
 
+Required fast parser path:
+
 ```sh
 west build -b native_sim zephyr/mr60bha2_console/tests/mr60bha2_parser
-west twister -T zephyr/mr60bha2_console/tests
+./build/zephyr/zephyr.exe
 ```
 
-The parser test currently verifies initialization, empty input handling, partial frame handling, and MR60BHA2 frame envelope detection. Real captured radar frames should be added next.
+Optional Twister path:
+
+```sh
+west twister -T zephyr/mr60bha2_console/tests --platform native_sim
+```
+
+The CI keeps the direct parser build/run as a required check. Twister is useful
+for Zephyr harness coverage, but it is allowed to be non-blocking until the
+harness is fully hardened.
+
+The parser test currently verifies initialization, empty input handling, partial
+frame handling, MR60BHA2 frame envelope detection, and saved fixture decoding for
+heart rate, breathing rate, distance, presence, and target tracking.
 
 If the BH1750 is present, the `light` and `light_ready` fields should populate after boot; otherwise they remain `null`/`false`.
+
+## Release Artifacts
+
+Tagged releases build the real XIAO ESP32-C6 Zephyr firmware and publish the
+signed binary alongside the ELF, map file, native simulator parser executable,
+protocol schema, and protocol examples.
 
 ## Hardware Bring-Up Notes
 

@@ -60,8 +60,7 @@ void setup() {
   Serial.println(WiFi.softAPIP());
   Serial.print("OTA hostname: ");
   Serial.println(otaHostname);
-  Serial.print("OTA password: ");
-  Serial.println(OTA_PASSWORD);
+  Serial.println("OTA password: configured but not printed");
   Serial.print("BH1750: ");
   Serial.println(ambientLightReady ? "ready" : "not found");
 }
