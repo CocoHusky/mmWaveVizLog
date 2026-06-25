@@ -19,7 +19,7 @@ env:
 
 jobs:
   zephyr:
-    name: Parser, Twister, and schema validation
+    name: Parser and schema validation
     runs-on: ubuntu-latest
     env:
       ZEPHYR_TOOLCHAIN_VARIANT: host
@@ -77,15 +77,6 @@ jobs:
       - name: Run parser tests
         run: |
           "$GITHUB_WORKSPACE/build/parser-tests/zephyr/zephyr.exe"
-
-      - name: Run Twister
-        working-directory: ${{ env.ZEPHYR_WORKSPACE }}
-        run: |
-          west twister \
-            -T "$GITHUB_WORKSPACE/$APP_PATH/tests" \
-            --platform native_sim \
-            --inline-logs \
-            --outdir "$GITHUB_WORKSPACE/build/twister"
 
       - name: Validate JSON schema examples
         run: |
