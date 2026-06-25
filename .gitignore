@@ -11,6 +11,9 @@
 *.pioenvs
 *.pio/build
 
+# Local device credentials and overrides
+arduino/MR60BHA2_Sensor_VisLog/vislog_private_config.h
+
 # Temporary editor files
 *~
 *.swp
