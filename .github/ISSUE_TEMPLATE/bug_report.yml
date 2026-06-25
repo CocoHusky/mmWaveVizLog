@@ -1,0 +1,49 @@
+name: Bug report
+description: Report a firmware, protocol, dashboard, or CI problem.
+title: "bug: "
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Arduino quickstart
+        - Zephyr runtime
+        - Protocol/schema
+        - Dashboard/API
+        - CI/release
+        - Documentation
+    validations:
+      required: true
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed behavior
+      description: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should have happened?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction steps
+      placeholder: |
+        1. Build ...
+        2. Flash ...
+        3. Open ...
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or sample output
+      render: text
+    validations:
+      required: false
