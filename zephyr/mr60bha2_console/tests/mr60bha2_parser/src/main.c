@@ -122,6 +122,33 @@ ZTEST(mr60bha2_parser, init_starts_empty)
 	zassert_false(parser.collecting);
 }
 
+ZTEST(mr60bha2_parser, ignores_bytes_before_sync)
+{
+	struct mr60bha2_parser parser;
+
+	mr60bha2_parser_init(&parser);
+
+	zassert_equal(mr60bha2_parser_process_byte(&parser, 0x00),
+		      MR60BHA2_PARSE_NEED_MORE);
+	zassert_equal(parser.frame.len, 0);
+	zassert_false(parser.collecting);
+}
+
+ZTEST(mr60bha2_parser, buffers_partial_frame)
+{
+	struct mr60bha2_parser parser;
+
+	mr60bha2_parser_init(&parser);
+
+	zassert_equal(mr60bha2_parser_process_byte(&parser, 0x01),
+		      MR60BHA2_PARSE_NEED_MORE);
+	zassert_equal(mr60bha2_parser_process_byte(&parser, 0x80),
+		      MR60BHA2_PARSE_NEED_MORE);
+	zassert_true(parser.collecting);
+	zassert_equal(parser.frame.len, 2);
+	zassert_false(mr60bha2_parser_take_frame(&parser, &(struct mr60bha2_frame){0}));
+}
+
 ZTEST(mr60bha2_parser, detects_frame_envelope)
 {
 	struct mr60bha2_parser parser;
