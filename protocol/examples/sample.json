@@ -22,7 +22,7 @@
   "targets": [],
   "light": null,
   "light_ready": false,
-  "console_fw": "Zephyr 2.2.1",
+  "console_fw": "mmWaveVizLog 0.1.0",
   "firmware_valid": false,
   "firmware_raw": 0,
   "firmware_project": 0,
@@ -36,4 +36,3 @@
   "last_radar_ms": 0,
   "uptime_ms": 0
 }
-
