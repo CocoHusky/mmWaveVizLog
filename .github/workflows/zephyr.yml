@@ -3,6 +3,10 @@ name: Zephyr CI
 on:
   push:
   pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 env:
   APP_PATH: zephyr/mr60bha2_console
@@ -17,6 +21,9 @@ jobs:
   zephyr:
     name: Parser, Twister, and schema validation
     runs-on: ubuntu-latest
+    env:
+      # native_sim builds should use the host compiler, not Zephyr SDK discovery.
+      ZEPHYR_TOOLCHAIN_VARIANT: host
 
     steps:
       - name: Check out repository
@@ -45,7 +52,6 @@ jobs:
           python3 -m pip install --user --upgrade pip
           python3 -m pip install --user west jsonschema
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          echo "ZEPHYR_SDK_INSTALL_DIR=$RUNNER_TEMP/zephyr-sdk" >> "$GITHUB_ENV"
 
       - name: Initialize Zephyr workspace
         run: |
@@ -59,14 +65,6 @@ jobs:
           west update
           west zephyr-export
           python3 -m pip install --user -r zephyr/scripts/requirements.txt
-
-      - name: Install Zephyr SDK host tools
-        run: |
-          west sdk install \
-            --version "$ZEPHYR_SDK_VERSION" \
-            -T \
-            -d "$ZEPHYR_SDK_INSTALL_DIR"
-        working-directory: ${{ env.ZEPHYR_WORKSPACE }}
 
       - name: Build parser tests
         working-directory: ${{ env.ZEPHYR_WORKSPACE }}
@@ -156,7 +154,6 @@ jobs:
           python3 -m pip install --user --upgrade pip
           python3 -m pip install --user west
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          echo "ZEPHYR_SDK_INSTALL_DIR=$RUNNER_TEMP/zephyr-sdk" >> "$GITHUB_ENV"
 
       - name: Initialize Zephyr workspace
         run: |
@@ -172,17 +169,38 @@ jobs:
           west packages pip --install
         working-directory: ${{ env.ZEPHYR_WORKSPACE }}
 
+      - name: Fetch Espressif binary blobs
+        run: |
+          west blobs fetch hal_espressif
+        working-directory: ${{ env.ZEPHYR_WORKSPACE }}
+
       - name: Install Zephyr SDK
         run: |
           west sdk install \
             --version "$ZEPHYR_SDK_VERSION" \
             -t riscv64-zephyr-elf \
-            -d "$ZEPHYR_SDK_INSTALL_DIR"
+            -d "$RUNNER_TEMP/zephyr-sdk"
+
+          SDK_CONFIG="$(find "$RUNNER_TEMP/zephyr-sdk" -type f \( \
+            -name 'Zephyr-sdkConfig.cmake' -o \
+            -name 'Zephyr-sdk-config.cmake' -o \
+            -name 'zephyr-sdk-config.cmake' \
+          \) -print -quit)"
+
+          if [ -z "$SDK_CONFIG" ]; then
+            echo "Could not locate Zephyr SDK CMake package under $RUNNER_TEMP/zephyr-sdk" >&2
+            exit 1
+          fi
+
+          SDK_ROOT="$(dirname "$(dirname "$(dirname "$SDK_CONFIG")")")"
+          echo "ZEPHYR_SDK_INSTALL_DIR=$SDK_ROOT" >> "$GITHUB_ENV"
+          echo "Zephyr SDK installed at $SDK_ROOT"
         working-directory: ${{ env.ZEPHYR_WORKSPACE }}
 
       - name: Build firmware
         run: |
           west build \
+            -p always \
             -b "$BOARD" \
             "$GITHUB_WORKSPACE/$APP_PATH" \
             -d "$GITHUB_WORKSPACE/$FIRMWARE_BUILD_DIR"
