@@ -10,6 +10,11 @@ first base implementation used to get the hardware, wiring, Wi-Fi, OTA, and UI
 working before the Zephyr runtime was built, and it remains the easiest path for
 others to follow when first powering up the device.
 
+This repository is scoped as an embedded sensing software platform. It covers
+firmware, protocol, validation, release management, and developer workflow.
+Mechanical enclosure, battery, thermal, charging, skin-contact, and wearable
+product integration work belongs in a separate hardware/product repository.
+
 It can collect:
 
 - presence and target count
@@ -22,6 +27,21 @@ It can collect:
 
 The live JSON sample endpoint is `GET /api/sample`.
 
+## What this demonstrates
+
+This repository demonstrates embedded product-software development for a compact sensing device:
+
+- Zephyr firmware architecture for XIAO ESP32-C6
+- Arduino quick-start path for first-boot hardware bring-up
+- UART radar-frame parsing with saved binary fixture tests
+- I2C ambient-light integration
+- schema-compatible JSON sample streaming
+- local Wi-Fi dashboard and browser session logging
+- local LED feedback and threshold rules
+- OTA/release workflow with signed firmware artifacts
+- CI-managed parser tests, schema validation, and firmware builds
+- software requirements, validation, release-management, and protocol documentation
+
 ```mermaid
 flowchart TB
   A(["MR60BHA2 Sensor VisLog"])
@@ -33,6 +53,19 @@ flowchart TB
 ```
 
 ![Radar target tracking preview](images/radar-target-tracking-single.png)
+
+## Software platform docs
+
+| Document | Purpose |
+| --- | --- |
+| [`docs/software-architecture.md`](docs/software-architecture.md) | System-level software architecture and repository scope. |
+| [`docs/firmware-module-map.md`](docs/firmware-module-map.md) | Firmware module responsibilities and verification hooks. |
+| [`docs/software-requirements.md`](docs/software-requirements.md) | Software requirements and traceability. |
+| [`docs/software-validation-plan.md`](docs/software-validation-plan.md) | Software validation matrix and manual validation checklist. |
+| [`docs/dashboard-api-validation.md`](docs/dashboard-api-validation.md) | Dashboard and local API validation procedure. |
+| [`docs/release-management.md`](docs/release-management.md) | Release gates, versioning, and artifact verification. |
+| [`protocol/README.md`](protocol/README.md) | Protocol overview, compatibility rules, units, and null handling. |
+| [`CHANGELOG.md`](CHANGELOG.md) | Planned and released software-platform changes. |
 
 ## Runtime Paths
 
@@ -57,7 +90,7 @@ Releases use semantic-style tags in the form `vA.B.C`.
 - `C` is the patch version. Increase this for fixes, documentation updates,
   CI fixes, and small compatibility improvements.
 
-Current first release target: `v0.1.0`.
+Current prepared release target: `v0.2.0`.
 
 For this repo, `0.x.y` means the project is still in active prototype/runtime
 bring-up. The Zephyr app `VERSION`, Arduino reference firmware version, protocol
@@ -172,10 +205,12 @@ Selected reading and public links:
 ```text
 arduino/mmwavevizlog-quickstart/
   Arduino quick-start bring-up and hardware-reference firmware
+docs/
+  software architecture, requirements, validation, API, and release management
 images/
   screenshots and setup photos used by the documentation
 protocol/
-  JSON schema and serial stream notes
+  JSON schema, examples, and serial stream notes
 zephyr/mmwavevizlog-runtime/
   maintained Zephyr product/runtime firmware
 LICENSE
@@ -237,13 +272,13 @@ It builds the parser test, validates protocol examples, builds the real XIAO
 ESP32-C6 Zephyr firmware, verifies `zephyr.signed.bin`, uploads workflow
 artifacts, and publishes a GitHub Release.
 
-Normal release flow:
+Normal release flow for the prepared software-platform release:
 
 ```sh
 git checkout main
 git pull
-git tag v0.1.0
-git push origin v0.1.0
+git tag v0.2.0
+git push origin v0.2.0
 ```
 
 The release should include:
@@ -253,6 +288,8 @@ The release should include:
 - native simulator parser executable
 - protocol JSON schema
 - protocol JSON examples
+
+See [`docs/release-management.md`](docs/release-management.md) for release gates, artifact verification, and rollback guidance.
 
 ## Troubleshooting
 
