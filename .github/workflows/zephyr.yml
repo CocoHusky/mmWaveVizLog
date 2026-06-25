@@ -115,9 +115,8 @@ jobs:
           PY
 
   twister:
-    name: Optional Twister parser suite
+    name: Advisory Twister parser suite
     runs-on: ubuntu-latest
-    continue-on-error: true
     env:
       ZEPHYR_TOOLCHAIN_VARIANT: host
 
@@ -162,14 +161,25 @@ jobs:
           west zephyr-export
           python3 -m pip install --user -r zephyr/scripts/requirements.txt
 
-      - name: Run Twister
+      - name: Run Twister advisory check
         working-directory: ${{ env.ZEPHYR_WORKSPACE }}
         run: |
+          set +e
           west twister \
             -T "$GITHUB_WORKSPACE/$APP_PATH/tests" \
             --platform native_sim \
             --inline-logs \
             --outdir "$GITHUB_WORKSPACE/build/twister"
+          twister_status=$?
+          set -e
+
+          if [ "$twister_status" -ne 0 ]; then
+            echo "::warning::Twister parser suite failed with exit code $twister_status. Parser executable and firmware builds remain the required release gates."
+          else
+            echo "Twister parser suite passed."
+          fi
+
+          exit 0
 
   firmware:
     name: Build XIAO ESP32-C6 firmware
