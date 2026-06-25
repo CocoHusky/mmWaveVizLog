@@ -1,0 +1,43 @@
+name: Validation task
+description: Track software validation work for firmware, protocol, dashboard/API, or release artifacts.
+title: "validation: "
+labels:
+  - validation
+body:
+  - type: input
+    id: requirement
+    attributes:
+      label: Requirement ID
+      description: Link to a requirement from docs/software-requirements.md, for example REQ-SW-001.
+      placeholder: REQ-SW-___
+    validations:
+      required: true
+  - type: input
+    id: validation-id
+    attributes:
+      label: Validation ID
+      description: Link to a validation item from docs/software-validation-plan.md, for example VAL-SW-001.
+      placeholder: VAL-SW-___
+    validations:
+      required: true
+  - type: textarea
+    id: setup
+    attributes:
+      label: Test setup
+      description: Hardware, firmware path, commands, dashboard/API steps, or release workflow used.
+    validations:
+      required: true
+  - type: textarea
+    id: pass-fail
+    attributes:
+      label: Pass/fail criteria
+      description: Define objective criteria before running the validation.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence location
+      description: CI run, screenshot, release URL, saved response, or notes.
+    validations:
+      required: false
