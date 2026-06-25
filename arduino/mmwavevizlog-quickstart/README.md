@@ -1,61 +1,15 @@
-# MR60BHA2 Sensor quick setup
+# mmWaveVizLog Arduino Quickstart
 
-A minimal Arduino bring-up reference for the Seeed Studio MR60BHA2 mmWave radar
-module running on a XIAO ESP32-C6. Use this path to verify hardware wiring,
-board setup, Wi-Fi, and sensor behavior before working on the maintained Zephyr
-runtime. The device creates its own Wi-Fi access point and serves a local web
-dashboard for live radar, bio-signal, target tracking, ambient light, status LED
-rules, and session logging.
+A quick-start Arduino bring-up reference for the Seeed Studio MR60BHA2 mmWave
+radar module running on a XIAO ESP32-C6. Use this path to verify hardware
+wiring, board setup, Wi-Fi, OTA, LED behavior, and sensor behavior before
+working on the maintained Zephyr runtime at `zephyr/mmwavevizlog-runtime/`.
 
-```mermaid
-flowchart LR
-  subgraph foundation["Foundation"]
-    direction TB
-    CFG["vislog_config.h"]
-    TYPES["vislog_types.h"]
-    GLO["vislog_globals.cpp/.h"]
-    CFG --> TYPES --> GLO
-  end
-
-  subgraph app["Application"]
-    direction TB
-    INO["MR60BHA2_Sensor_VisLog.ino"]
-  end
-
-  subgraph services["Services"]
-    direction TB
-    RAD["radar_sensor.cpp/.h"]
-    LUX["ambient_light.cpp/.h"]
-    LED["led_control.cpp/.h"]
-    JSON["json_stream.cpp/.h"]
-    WEB["web_server.cpp/.h"]
-    OTA["ota_updates.cpp/.h"]
-  end
-
-  subgraph ui["UI"]
-    direction TB
-    PAGE["dashboard_page.h"]
-  end
-
-  INO --> RAD
-  INO --> LUX
-  INO --> LED
-  INO --> JSON
-  INO --> WEB
-  INO --> OTA
-
-  GLO --> RAD
-  GLO --> LUX
-  GLO --> LED
-  GLO --> JSON
-  GLO --> WEB
-  GLO --> OTA
-  WEB --> PAGE
-```
+The device creates its own Wi-Fi access point and serves a local web dashboard
+for live radar, bio-signal, target tracking, ambient light, status LED rules,
+and session logging.
 
 ## What it does
-
-This sketch turns the XIAO ESP32-C6 into a local sensor test bench:
 
 - Reads MR60BHA2 radar data over UART.
 - Displays heart rate, breathing rate, radar range, presence, raw phase, breathing phase, and heart phase.
@@ -70,15 +24,20 @@ This sketch turns the XIAO ESP32-C6 into a local sensor test bench:
 
 ## Important behavior notes
 
-The multi-target list is frame-based. `Target 1`, `Target 2`, and `Target 3` are the first, second, and third targets reported in the current radar packet. They are not guaranteed persistent identities, so two people can swap target numbers between frames.
+The multi-target list is frame-based. `Target 1`, `Target 2`, and `Target 3`
+are the first, second, and third targets reported in the current radar packet.
+They are not guaranteed persistent identities, so two people can swap target
+numbers between frames.
 
-The sketch keeps a primary target summary using the first target in the packet. For multi-person testing, use the individual target cards and multi-target plots rather than assuming `Target 1` is always the same person.
+The sketch keeps a primary target summary using the first target in the packet.
+For multi-person testing, use the individual target cards and multi-target plots
+rather than assuming `Target 1` is always the same person.
 
 ## Repository Layout
 
 ```text
-arduino/MR60BHA2_Sensor_VisLog/
-  MR60BHA2_Sensor_VisLog.ino
+arduino/mmwavevizlog-quickstart/
+  mmwavevizlog-quickstart.ino
   vislog_config.h
   vislog_types.h
   vislog_globals.cpp
@@ -101,8 +60,6 @@ arduino/MR60BHA2_Sensor_VisLog/
 
 ## Hardware
 
-Tested target setup:
-
 | Part | Purpose |
 |---|---|
 | Seeed Studio XIAO ESP32-C6 | Main microcontroller, Wi-Fi access point, dashboard server |
@@ -114,8 +71,6 @@ Tested target setup:
 
 ## Pin configuration
 
-These are the default pins used by the sketch:
-
 | Signal | XIAO ESP32-C6 pin in code | Connects to |
 |---|---:|---|
 | Radar UART RX | `17` | MR60BHA2 TX |
@@ -125,37 +80,27 @@ These are the default pins used by the sketch:
 | I2C SCL | `23` | BH1750 SCL |
 | I2C address | `0x23` | BH1750 default address |
 
-Also connect `3V3`/power and `GND` between the XIAO, MR60BHA2, BH1750, and LED as required by your hardware. If your MR60BHA2 breakout requires 5 V, follow the module documentation and make sure UART logic levels are safe for the ESP32-C6.
+Also connect `3V3`/power and `GND` between the XIAO, MR60BHA2, BH1750, and LED
+as required by your hardware. If your MR60BHA2 breakout requires 5 V, follow the
+module documentation and make sure UART logic levels are safe for the ESP32-C6.
 
 ## Software requirements
 
-Install the following before uploading:
-
 1. Arduino IDE or Arduino CLI.
 2. ESP32 Arduino board package with XIAO ESP32-C6 support.
-3. Seeed mmWave library that provides:
-   - `Seeed_Arduino_mmWave.h`
-   - `SEEED_MR60BHA2`
-   - `PeopleCounting`
-   - `TargetN`
-4. Built-in ESP32/Arduino libraries used by the sketch:
-   - `Arduino.h`
-   - `ArduinoOTA.h`
-   - `HardwareSerial.h`
-   - `WebServer.h`
-   - `WiFi.h`
-   - `Wire.h`
-   - `esp32-hal-rgb-led.h`
+3. Seeed mmWave library that provides `Seeed_Arduino_mmWave.h`, `SEEED_MR60BHA2`, `PeopleCounting`, and `TargetN`.
+4. Built-in ESP32/Arduino libraries used by the sketch: `ArduinoOTA.h`, `HardwareSerial.h`, `WebServer.h`, `WiFi.h`, `Wire.h`, and `esp32-hal-rgb-led.h`.
 
 ## Arduino IDE setup
 
-1. Open the `arduino/MR60BHA2_Sensor_VisLog/` folder in Arduino IDE.
-2. Select your board. Use `XIAO ESP32-C6` if available. If not, use the closest ESP32-C6 board profile that works with your installed board package.
-3. Set the serial monitor to `115200 baud`.
-4. Upload the sketch over USB.
-5. Open the serial monitor. You should see startup messages showing the Wi-Fi network, local IP address, OTA hostname, and whether the BH1750 was found.
-6. After upload, wait a few seconds for Wi-Fi and OTA to appear before retrying or assuming the board failed.
-7. Use OTA only after the sketch is already running and the board is reachable on its Wi-Fi AP.
+1. Open the `arduino/mmwavevizlog-quickstart/` folder in Arduino IDE.
+2. Open `mmwavevizlog-quickstart.ino`.
+3. Select your board. Use `XIAO ESP32-C6` if available.
+4. Set the serial monitor to `115200 baud`.
+5. Upload the sketch over USB.
+6. Open the serial monitor. You should see startup messages showing the Wi-Fi network, local IP address, OTA hostname, and whether the BH1750 was found.
+7. After upload, wait a few seconds for Wi-Fi and OTA to appear before retrying or assuming the board failed.
+8. Use OTA only after the sketch is already running and the board is reachable on its Wi-Fi AP.
 
 ## Wi-Fi and dashboard
 
@@ -167,79 +112,35 @@ Password: wirelessphysiology
 Dashboard: http://192.168.4.1/
 ```
 
-Each board appends the last 3 bytes of its ESP32-C6 ID to the Wi-Fi name, for example `mmWaveVisLog-MR60BHA2-A1B2C3`. The same generated name is printed at boot in the serial monitor.
+Each board appends the last 3 bytes of its ESP32-C6 ID to the Wi-Fi name. The
+same generated name is printed at boot in the serial monitor.
 
-Connect your laptop or phone to that Wi-Fi network, then open the dashboard URL in a browser.
+Connect your laptop or phone to that Wi-Fi network, then open the dashboard URL
+in a browser.
 
-## Dashboard sections
+## Local credential override
 
-### Connection + device status
+For a private device or demo device, copy:
 
-Shows whether the browser is receiving live data, the current frame rate, firmware version, and radar status.
+```text
+arduino/mmwavevizlog-quickstart/vislog_private_config.example.h
+```
 
-### Radar Target Tracking
+to:
 
-Shows presence, target count, primary range/angle/speed, individual target cards, and a radar-style plot. The plot displays target dots in front of the sensor with range rings.
+```text
+arduino/mmwavevizlog-quickstart/vislog_private_config.h
+```
 
-### Bio-signal measurements
-
-Plots heart rate, breathing rate, raw motion phase, breathing motion phase, and heart motion phase.
-
-### Range + motion
-
-Plots primary range and per-target range, angle, and speed.
-
-### Environment
-
-Plots ambient light from the BH1750.
-
-### Status LED Control
-
-Lets you set the LED to solid, off, or breathing pulse mode.
-
-### Sensor-to-LED Rule
-
-Lets you map a selected measurement to LED colors using low/high thresholds. Example use cases:
-
-- Turn LED red if target speed is below a threshold.
-- Turn LED blue if target speed is above a threshold.
-- Turn LED green/yellow/red based on breathing rate, heart rate, range, or light level.
-
-### Session Logger
-
-Records the JSON samples in the browser and exports a local `.json` file. This is useful for quick experiments without needing a separate SD card or server.
+Then change `VISLOG_WIFI_AP_PASSWORD` and `VISLOG_OTA_PASSWORD`. The private
+override file is ignored by Git.
 
 ## API endpoints
 
 ### `GET /api/sample`
 
-Returns the latest sensor state as JSON.
-
-Common fields:
-
-```json
-{
-  "heart_rate": 72.0,
-  "breath_rate": 14.0,
-  "distance": 1.25,
-  "raw_distance": 125.0,
-  "total_phase": 0.0,
-  "breath_phase": 0.0,
-  "heart_phase": 0.0,
-  "presence": true,
-  "presence_valid": true,
-  "target_count": 1,
-  "target_distance": 1.2,
-  "target_angle": 4.5,
-  "target_speed": 0.02,
-  "targets": [],
-  "light": 120.5,
-  "frame": 1234,
-  "uptime_ms": 60000
-}
-```
-
-Fields may be `null` when the sensor has not reported a valid value yet.
+Returns the latest sensor state as JSON. Fields may be `null` when the sensor
+has not reported a valid value yet.
 
 ### `POST /api/led`
 
@@ -283,52 +184,30 @@ OTA is enabled after the device boots.
 
 ```text
 OTA hostname: mmWaveVisLog-MR60BHA2-OTA-A1B2C3
-OTA password: wp-ota
+Default OTA password: wp-ota
 ```
 
-After upload or reset, Wi-Fi and OTA can take a few seconds to appear. If the access point or OTA target is not visible immediately, wait briefly before retrying.
-
-For lower data latency, OTA is polled periodically while idle instead of on every sensor loop. Once an upload starts, OTA handling switches to continuous service. For faster uploads, the sketch pauses radar/light/LED polling only while an OTA upload is actively in progress. This is controlled by `OTA_PAUSES_SENSOR_COLLECTION` in `vislog_config.h`. Set it to `false` only if you prefer sensor collection to continue during OTA; uploads will be slower and less reliable.
-
-The dashboard frame-rate field shows both browser/API sample cadence and parsed radar-report cadence. `Sample` is measured from successful `/api/sample` responses. `Sensor` is how often the MR60BHA2 emits decoded data such as heart rate, breathing rate, phase, or targets. Both rates are displayed as one-second averages to avoid noisy instantaneous readings.
-
-Use OTA only on a trusted local network. The access point password and OTA password are hard-coded in the sketch, so change them before using this outside a controlled test setup.
-If OTA reports `No response from device`, the board is usually not yet on its AP or not reachable at `192.168.4.1`; reconnect over USB, wait for the boot messages, then retry.
+After upload or reset, Wi-Fi and OTA can take a few seconds to appear. Use OTA
+only on a trusted local network. Change the default credentials before using this
+outside a controlled test setup.
 
 ## Data interpretation
 
-### Distance units
+Some firmware/library combinations report distance in centimeters even when
+examples imply meters. The sketch normalizes suspiciously large range values by
+dividing by 100 and rejects values outside the configured valid range.
 
-Some firmware/library combinations report distance in centimeters even when examples imply meters. The sketch normalizes suspiciously large range values by dividing by 100 and rejects values outside the configured valid range.
+Target `x` and `y` are normalized to meters if the raw values look like
+centimeters. Range and angle are derived from `x` and `y`.
 
-Default valid range:
-
-```cpp
-static constexpr float MAX_VALID_RADAR_RANGE_M = 6.0f;
-```
-
-### Target coordinates
-
-Target `x` and `y` are normalized to meters if the raw values look like centimeters. Range and angle are derived from `x` and `y`:
-
-```cpp
-distance = hypotf(x, y);
-angle = atan2f(x, y) * 180.0f / PI;
-```
-
-### Target speed
-
-Target speed is estimated from Doppler index using the library-provided `RANGE_STEP` value:
-
-```cpp
-speed = dop_index * RANGE_STEP / 100.0f;
-```
+Target speed is estimated from Doppler index using the library-provided
+`RANGE_STEP` value.
 
 ## Troubleshooting
 
 ### I can upload, but the dashboard does not load
 
-- Make sure your computer/phone is connected to `VisLog-MR60BHA2` Wi-Fi.
+- Make sure your computer/phone is connected to the device Wi-Fi.
 - Open `http://192.168.4.1/` exactly.
 - Check the serial monitor for the softAP IP address.
 
@@ -344,53 +223,3 @@ speed = dop_index * RANGE_STEP / 100.0f;
 - Check SDA/SCL wiring.
 - Confirm the BH1750 address is `0x23`.
 - Some BH1750 boards can use `0x5C` depending on the ADDR pin. Change `AMBIENT_LIGHT_I2C_ADDRESS` if needed.
-
-### LED does not work
-
-- Confirm the data pin matches `STATUS_LED_PIN`.
-- Confirm the LED has proper power and ground.
-- Some XIAO boards use a different onboard RGB LED pin or LED type. If the LED does not respond, verify the board-specific LED support for `rgbLedWrite()`.
-
-### Target numbers jump around
-
-This is expected. Target order is determined by the current radar packet and may change between frames. Do not treat `Target 1` as a persistent person ID.
-
-## Things to customize
-
-At the top of the sketch, these are the most common settings to edit:
-
-```cpp
-static constexpr int RADAR_RX_PIN = 17;
-static constexpr int RADAR_TX_PIN = 16;
-static constexpr int STATUS_LED_PIN = 1;
-static constexpr int I2C_SDA_PIN = 22;
-static constexpr int I2C_SCL_PIN = 23;
-static constexpr uint8_t AMBIENT_LIGHT_I2C_ADDRESS = 0x23;
-static constexpr float MAX_VALID_RADAR_RANGE_M = 6.0f;
-
-static const char *DEVICE_NAME_PREFIX = "mmWaveVisLog-MR60BHA2";
-static const char *OTA_HOSTNAME_PREFIX = "mmWaveVisLog-MR60BHA2-OTA";
-static const char *WIFI_AP_PASSWORD = "wirelessphysiology";
-static const char *OTA_PASSWORD = "wp-ota";
-```
-
-## Recommended experiment workflow
-
-1. Upload the sketch.
-2. Open serial monitor at 115200 baud.
-3. Connect to the device Wi-Fi.
-4. Open the dashboard.
-5. Stand still at known distances and verify primary range.
-6. Add a second person and observe target count and target swapping.
-7. Start recording.
-8. Run a short controlled test.
-9. Export JSON.
-10. Compare range, angle, speed, heart rate, breathing rate, and phase values offline.
-
-## File structure
-
-```text
-MR60BHA2_Sensor_VisLog/
-├── MR60BHA2_Sensor_VisLog.ino
-└── README.md
-```
