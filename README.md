@@ -3,10 +3,12 @@
 ## Summary
 
 MR60BHA2 Sensor VisLog is a local radar console for the Seeed MR60BHA2 on a
-XIAO ESP32-C6. The maintained runtime lives in `zephyr/mr60bha2_console/`.
-The Arduino project under `arduino/MR60BHA2_Sensor_VisLog/` is a bring-up and
-hardware-reference path for quickly verifying wiring, board selection, Wi-Fi,
-and sensor behavior.
+XIAO ESP32-C6. The maintained product runtime lives in
+`zephyr/mr60bha2_console/`. The Arduino project under
+`arduino/MR60BHA2_Sensor_VisLog/` is the quick-start bring-up path: it was the
+first base implementation used to get the hardware, wiring, Wi-Fi, OTA, and UI
+working before the Zephyr runtime was built, and it remains the easiest path for
+others to follow when first powering up the device.
 
 It can collect:
 
@@ -31,6 +33,35 @@ flowchart TB
 ```
 
 ![Radar target tracking preview](images/radar-target-tracking-single.png)
+
+## Runtime Paths
+
+| Path | Purpose | When to use |
+| --- | --- | --- |
+| `zephyr/mr60bha2_console/` | Main product/runtime firmware | Use this for maintained firmware builds, CI, signed release artifacts, OTA flow, parser tests, and protocol-aligned runtime work. |
+| `arduino/MR60BHA2_Sensor_VisLog/` | Quick-start bring-up and reference firmware | Use this first when validating wiring, board selection, sensor behavior, Wi-Fi AP behavior, LED output, and the UI on a new hardware setup. |
+
+The Arduino path is intentionally kept simple and approachable. It is not the
+long-term release target, but it is useful for fast hardware verification and
+for users who want to get the device running before installing the full Zephyr
+toolchain.
+
+## Versioning
+
+Releases use semantic-style tags in the form `vA.B.C`.
+
+- `A` is the major version. Increase this for breaking protocol, hardware, or
+  firmware behavior changes.
+- `B` is the minor version. Increase this for new features that remain mostly
+  compatible.
+- `C` is the patch version. Increase this for fixes, documentation updates,
+  CI fixes, and small compatibility improvements.
+
+Current first release target: `v0.1.0`.
+
+For this repo, `0.x.y` means the project is still in active prototype/runtime
+bring-up. The Zephyr app `VERSION`, Arduino reference firmware version, protocol
+examples, and GitHub release tag should stay aligned when practical.
 
 ## JSON Output
 
@@ -74,7 +105,6 @@ Fields returned by the runtime sample stream:
 | `last_radar_ms` | Milliseconds since the last radar update. |
 | `uptime_ms` | Device uptime in milliseconds. |
 
-
 ## Hardware
 
 1. Seeed Studio 60 GHz mmWave sensor module pack
@@ -90,7 +120,8 @@ Where to buy:
 
 ## Hardware Pins
 
-These are the pins used by `arduino/MR60BHA2_Sensor_VisLog/MR60BHA2_Sensor_VisLog.ino`.
+These are the pins used by the Arduino bring-up path and preserved by the
+Zephyr runtime overlay.
 
 | Hardware pin | GPIO |
 | --- | --- |
@@ -144,13 +175,13 @@ as `build/` and `zephyr/workspace/`.
 
 ```text
 arduino/MR60BHA2_Sensor_VisLog/
-  Arduino bring-up and hardware-reference firmware
+  Arduino quick-start bring-up and hardware-reference firmware
 images/
   screenshots and setup photos used by the documentation
 protocol/
   JSON schema and serial stream notes
 zephyr/mr60bha2_console/
-  maintained Zephyr firmware runtime
+  maintained Zephyr product/runtime firmware
 LICENSE
 README.md
 ```
@@ -175,11 +206,11 @@ metadata files.
 
 ## Quick Setup
 
-### Arduino Bring-Up Reference
+### Arduino Quick-Start Bring-Up
 
-Use this when you need a minimal bring-up reference or need to confirm the
-sensor wiring and board selection before working on the maintained Zephyr
-runtime.
+Use this first when you need a minimal path to confirm the sensor wiring, board
+selection, Wi-Fi AP, OTA behavior, LED behavior, and dashboard before working on
+the maintained Zephyr runtime.
 
 1. Install Arduino IDE 2.x.
 2. Install the Espressif ESP32 board package in Boards Manager.
@@ -190,9 +221,19 @@ runtime.
    After upload, give the board a few seconds to bring up Wi-Fi and OTA before assuming it failed.
    OTA only works after the sketch is already running and the board is reachable on its Wi-Fi AP.
 
+Optional local credential override:
+
+1. Copy `arduino/MR60BHA2_Sensor_VisLog/vislog_private_config.example.h` to
+   `arduino/MR60BHA2_Sensor_VisLog/vislog_private_config.h`.
+2. Change `VISLOG_WIFI_AP_PASSWORD` and `VISLOG_OTA_PASSWORD` in the copied file.
+3. Keep `vislog_private_config.h` local. It is ignored by Git.
+
+The committed passwords are development defaults for an easy first boot. Change
+them before sharing a device outside your own test setup.
+
 ### Zephyr Maintained Runtime
 
-Use Zephyr for the maintained firmware path in this repository.
+Use Zephyr for the maintained product/runtime firmware path in this repository.
 
 1. Install the Zephyr workspace and toolchain described in
    [`zephyr/mr60bha2_console/README.md`](zephyr/mr60bha2_console/README.md).
@@ -207,6 +248,30 @@ Use Zephyr for the maintained firmware path in this repository.
 
 3. Flash the board with the connected USB-C cable.
 4. Open the dashboard at `http://192.168.4.1/` after connecting to the device AP.
+
+## Release Process
+
+The release workflow runs on tags matching `v*.*.*` or by manual dispatch.
+It builds the parser test, validates protocol examples, builds the real XIAO
+ESP32-C6 Zephyr firmware, verifies `zephyr.signed.bin`, uploads workflow
+artifacts, and publishes a GitHub Release.
+
+Normal release flow:
+
+```sh
+git checkout main
+git pull
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+The release should include:
+
+- signed XIAO ESP32-C6 Zephyr firmware binary
+- Zephyr ELF and map files
+- native simulator parser executable
+- protocol JSON schema
+- protocol JSON examples
 
 ## Troubleshooting
 
@@ -223,10 +288,13 @@ If the upload fails or the board does not come back on Wi-Fi after flashing the 
 Connect to the device Wi-Fi:
 
 - SSID: `mmWaveVisLog-MR60BHA2-123MACID`
-- Password: `wirelessphysiology`
+- Default password: `wirelessphysiology`
 - UI: `http://192.168.4.1/`
 - OTA hostname: `mmWaveVisLog-MR60BHA2-OTA`
-- OTA password: `wp-ota`
+- Default OTA password: `wp-ota`
+
+These are development defaults. Override them with local
+`vislog_private_config.h` for private devices or shared demos.
 
 After upload or reset, Wi-Fi and OTA can take a few seconds to appear. If the access point or OTA target is not visible immediately, wait briefly before retrying.
 
