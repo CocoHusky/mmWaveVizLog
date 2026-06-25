@@ -4,8 +4,8 @@
 
 MR60BHA2 Sensor VisLog is a local radar console for the Seeed MR60BHA2 on a
 XIAO ESP32-C6. The maintained product runtime lives in
-`zephyr/mr60bha2_console/`. The Arduino project under
-`arduino/MR60BHA2_Sensor_VisLog/` is the quick-start bring-up path: it was the
+`zephyr/mmwavevizlog-runtime/`. The Arduino project under
+`arduino/mmwavevizlog-quickstart/` is the quick-start bring-up path: it was the
 first base implementation used to get the hardware, wiring, Wi-Fi, OTA, and UI
 working before the Zephyr runtime was built, and it remains the easiest path for
 others to follow when first powering up the device.
@@ -38,8 +38,8 @@ flowchart TB
 
 | Path | Purpose | When to use |
 | --- | --- | --- |
-| `zephyr/mr60bha2_console/` | Main product/runtime firmware | Use this for maintained firmware builds, CI, signed release artifacts, OTA flow, parser tests, and protocol-aligned runtime work. |
-| `arduino/MR60BHA2_Sensor_VisLog/` | Quick-start bring-up and reference firmware | Use this first when validating wiring, board selection, sensor behavior, Wi-Fi AP behavior, LED output, and the UI on a new hardware setup. |
+| `zephyr/mmwavevizlog-runtime/` | Main product/runtime firmware | Use this for maintained firmware builds, CI, signed release artifacts, OTA flow, parser tests, and protocol-aligned runtime work. |
+| `arduino/mmwavevizlog-quickstart/` | Quick-start bring-up and reference firmware | Use this first when validating wiring, board selection, sensor behavior, Wi-Fi AP behavior, LED output, and the UI on a new hardware setup. |
 
 The Arduino path is intentionally kept simple and approachable. It is not the
 long-term release target, but it is useful for fast hardware verification and
@@ -169,40 +169,21 @@ Selected reading and public links:
 
 ## Repo Layout
 
-Tracked source files are kept under the firmware, protocol, documentation, and
-asset directories. Generated Zephyr outputs belong in ignored local paths such
-as `build/` and `zephyr/workspace/`.
-
 ```text
-arduino/MR60BHA2_Sensor_VisLog/
+arduino/mmwavevizlog-quickstart/
   Arduino quick-start bring-up and hardware-reference firmware
 images/
   screenshots and setup photos used by the documentation
 protocol/
   JSON schema and serial stream notes
-zephyr/mr60bha2_console/
+zephyr/mmwavevizlog-runtime/
   maintained Zephyr product/runtime firmware
 LICENSE
 README.md
 ```
 
-The ideal repository tree should stay close to this:
-
-```text
-.
-|-- arduino/
-|   `-- MR60BHA2_Sensor_VisLog/
-|-- images/
-|-- protocol/
-|-- zephyr/
-|   `-- mr60bha2_console/
-|-- .gitignore
-|-- LICENSE
-`-- README.md
-```
-
-Do not commit local build products, Zephyr workspaces, editor caches, or macOS
-metadata files.
+Do not commit local build products, Zephyr workspaces, editor caches, macOS
+metadata files, or local device credential overrides.
 
 ## Quick Setup
 
@@ -215,7 +196,7 @@ the maintained Zephyr runtime.
 1. Install Arduino IDE 2.x.
 2. Install the Espressif ESP32 board package in Boards Manager.
 3. Install `Seeed_Arduino_mmWave` in Library Manager. (https://github.com/Love4yzp/Seeed-mmWave-library)
-4. Open `arduino/MR60BHA2_Sensor_VisLog/MR60BHA2_Sensor_VisLog.ino`.
+4. Open `arduino/mmwavevizlog-quickstart/mmwavevizlog-quickstart.ino`.
 5. Select `XIAO ESP32-C6` and the correct serial port.
 6. Upload once over USB, then use OTA if you want wireless updates.
    After upload, give the board a few seconds to bring up Wi-Fi and OTA before assuming it failed.
@@ -223,8 +204,8 @@ the maintained Zephyr runtime.
 
 Optional local credential override:
 
-1. Copy `arduino/MR60BHA2_Sensor_VisLog/vislog_private_config.example.h` to
-   `arduino/MR60BHA2_Sensor_VisLog/vislog_private_config.h`.
+1. Copy `arduino/mmwavevizlog-quickstart/vislog_private_config.example.h` to
+   `arduino/mmwavevizlog-quickstart/vislog_private_config.h`.
 2. Change `VISLOG_WIFI_AP_PASSWORD` and `VISLOG_OTA_PASSWORD` in the copied file.
 3. Keep `vislog_private_config.h` local. It is ignored by Git.
 
@@ -236,14 +217,14 @@ them before sharing a device outside your own test setup.
 Use Zephyr for the maintained product/runtime firmware path in this repository.
 
 1. Install the Zephyr workspace and toolchain described in
-   [`zephyr/mr60bha2_console/README.md`](zephyr/mr60bha2_console/README.md).
+   [`zephyr/mmwavevizlog-runtime/README.md`](zephyr/mmwavevizlog-runtime/README.md).
 2. Build the app from the repository root:
 
    ```sh
    cd /Users/username/Documents/GitHub/mmWaveVizLog
    export ZEPHYR_BASE="$PWD/zephyr/workspace/zephyr"
    export ZEPHYR_TOOLCHAIN_VARIANT=zephyr
-   west build -b xiao_esp32c6/esp32c6/hpcore zephyr/mr60bha2_console
+   west build -b xiao_esp32c6/esp32c6/hpcore zephyr/mmwavevizlog-runtime
    ```
 
 3. Flash the board with the connected USB-C cable.
